@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Information Management - Yuldoshev Behruz</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
   <style>
-    /* General Styles */
     body {
       font-family: 'Arial', sans-serif;
       background-color: #000;
@@ -15,34 +14,27 @@
       padding: 0;
       line-height: 1.6;
     }
-
-    /* Header Styles */
     header {
       background-color: #111;
       padding: 40px 20px;
       text-align: center;
       border-bottom: 2px solid #00ff00;
     }
-
     header h1 {
       margin: 0;
       font-size: 2.5em;
       color: #00ff00;
     }
-
     header p {
       margin: 10px 0 0;
       font-size: 1.2em;
       color: #ccc;
     }
-
-    /* Main Content Styles */
     main {
       padding: 20px;
       max-width: 800px;
       margin: 0 auto;
     }
-
     section {
       margin-bottom: 40px;
       background-color: #1a1a1a;
@@ -50,7 +42,6 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
-
     h2 {
       color: #00ff00;
       border-bottom: 2px solid #00ff00;
@@ -59,36 +50,31 @@
       display: flex;
       align-items: center;
     }
-
     h2 i {
       margin-right: 10px;
     }
-
     ul {
       list-style-type: none;
       padding: 0;
     }
-
     ul li {
       margin: 15px 0;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
     }
-
     ul li a {
       color: #00ff00;
       text-decoration: none;
       font-size: 1.1em;
       transition: color 0.3s ease;
+      word-break: break-word;
     }
-
     ul li a:hover {
       color: #00cc00;
       text-decoration: underline;
     }
-
     ul li button {
+      align-self: flex-start;
       background-color: #ff4444;
       color: #fff;
       border: none;
@@ -97,139 +83,152 @@
       font-size: 0.9em;
       border-radius: 5px;
       transition: background-color 0.3s ease;
+      margin-top: 5px;
     }
-
     ul li button:hover {
       background-color: #cc0000;
-    }
-
-    /* Google Drive Link Styles */
-    .drive-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .drive-link a {
-      color: #00ff00;
-      text-decoration: none;
-      font-size: 1.2em;
-      transition: color 0.3s ease;
-    }
-
-    .drive-link a:hover {
-      color: #00cc00;
-      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Information Management</h1>
-    <p>Yuldoshev Behruz - Student Portfolio</p>
+    <h1>Yuldoshev Behruz's Portfolio</h1>
+    <p>Your current grade is: <span id="grade-value">Loading...</span></p>
   </header>
-
   <main>
-    <!-- Grade Section -->
-    <section id="grade-section">
-      <h2><i class="fas fa-chart-line"></i> Current Grade</h2>
-      <p>Your current grade is: <span id="grade-value">Loading...</span>%</p>
-    </section>
-
-    <!-- Assignment Upload Section -->
     <section>
-      <h2><i class="fas fa-upload"></i> Upload Assignment</h2>
+      <h2><i class="fas fa-folder"></i> Manage Folders</h2>
+      <form id="folder-form">
+        <input type="text" id="folder-name" placeholder="Enter folder name" required>
+        <button type="submit">Create Folder</button>
+      </form>
+    </section>
+    <section>
+      <h2><i class="fas fa-file-upload"></i> Upload Assignment</h2>
       <form id="upload-form">
-        <input type="file" id="file-input" required>
+        <select id="folder-select">
+          <option value="">-- Select Folder --</option>
+        </select>
+        <input type="file" id="file-input">
+        <input type="url" id="link-input" placeholder="or paste a file/link URL">
         <button type="submit">Upload</button>
       </form>
     </section>
-
-    <!-- Assignment List Section -->
     <section>
-      <h2><i class="fas fa-folder-open"></i> Uploaded Assignments</h2>
-      <ul id="assignment-list"></ul>
+      <h2><i class="fas fa-folder-open"></i> Uploaded Files</h2>
+      <div id="folders-container"></div>
     </section>
-
-    <div class="drive-link">
-      <a href="https://drive.google.com" target="_blank">Open Google Drive</a>
-    </div>
   </main>
-
-  <footer style="text-align: center; padding: 20px; background-color: #111; color: #888;">
-    <p>&copy; 2023 Yuldoshev Behruz. All rights reserved.</p>
-  </footer>
-
   <script>
-    // Load assignments from local storage when the page loads
-    document.addEventListener('DOMContentLoaded', function () {
-      const assignments = JSON.parse(localStorage.getItem('assignments')) || [];
-      const assignmentList = document.getElementById('assignment-list');
-      assignments.forEach((assignment, index) => {
-        addAssignmentToList(assignment.name, assignment.url, index);
-      });
-    });
-
-    // Function to add an assignment to the list
-    function addAssignmentToList(name, url, index) {
-      const assignmentList = document.getElementById('assignment-list');
-
-      const listItem = document.createElement('li');
-      const link = document.createElement('a');
-      link.href = url;
-      link.textContent = name;
-      link.target = "_blank";
-
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', function () {
-        deleteAssignment(index);
-      });
-
-      listItem.appendChild(link);
-      listItem.appendChild(deleteButton);
-      assignmentList.appendChild(listItem);
+    window.folders = window.folders || JSON.parse(localStorage.getItem('folders')) || {};
+    function saveFolders() {
+      localStorage.setItem('folders', JSON.stringify(window.folders));
     }
-
-    // Function to delete an assignment
-    function deleteAssignment(index) {
-      const assignments = JSON.parse(localStorage.getItem('assignments')) || [];
-      assignments.splice(index, 1);
-      localStorage.setItem('assignments', JSON.stringify(assignments));
-
-      const assignmentList = document.getElementById('assignment-list');
-      assignmentList.innerHTML = '';
-      assignments.forEach((assignment, index) => {
-        addAssignmentToList(assignment.name, assignment.url, index);
+    function refreshFolderSelect() {
+      const select = document.getElementById('folder-select');
+      select.innerHTML = '<option value="">-- Select Folder --</option>';
+      Object.keys(window.folders).forEach(folder => {
+        const option = document.createElement('option');
+        option.value = folder;
+        option.textContent = folder;
+        select.appendChild(option);
       });
-
-      alert('Assignment deleted successfully!');
     }
-
-    // Handle file uploads
-    document.getElementById('upload-form').addEventListener('submit', function (e) {
+    function refreshFoldersDisplay() {
+      const container = document.getElementById('folders-container');
+      container.innerHTML = '';
+      Object.entries(window.folders).forEach(([folderName, files]) => {
+        const section = document.createElement('section');
+        section.innerHTML = `<h3>${folderName}</h3>`;
+        const ul = document.createElement('ul');
+        files.forEach((file, index) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          if (file.url.endsWith('.doc') || file.url.endsWith('.docx')) {
+            a.href = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(file.url)}`;
+          } else {
+            a.href = file.url;
+          }
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = file.name;
+          const del = document.createElement('button');
+          del.textContent = 'Delete';
+          del.onclick = () => {
+            window.folders[folderName].splice(index, 1);
+            if (window.folders[folderName].length === 0) delete window.folders[folderName];
+            saveFolders();
+            refreshFolderSelect();
+            refreshFoldersDisplay();
+          };
+          li.appendChild(a);
+          li.appendChild(del);
+          ul.appendChild(li);
+        });
+        section.appendChild(ul);
+        container.appendChild(section);
+      });
+    }
+    document.getElementById('folder-form').addEventListener('submit', e => {
       e.preventDefault();
-      const fileInput = document.getElementById('file-input');
-      const file = fileInput.files[0];
-      if (file) {
-        const fileURL = URL.createObjectURL(file);
-
-        const assignments = JSON.parse(localStorage.getItem('assignments')) || [];
-        assignments.push({ name: file.name, url: fileURL });
-        localStorage.setItem('assignments', JSON.stringify(assignments));
-
-        addAssignmentToList(file.name, fileURL, assignments.length - 1);
-
-        alert('Assignment uploaded successfully!');
-      } else {
-        alert('Please select a file to upload.');
+      const folderName = document.getElementById('folder-name').value.trim();
+      if (folderName && !window.folders[folderName]) {
+        window.folders[folderName] = [];
+        saveFolders();
+        refreshFolderSelect();
+        refreshFoldersDisplay();
+        document.getElementById('folder-name').value = '';
       }
     });
-
-    // Fetch grade from Google Apps Script Web App
-    fetch('https://script.google.com/macros/s/AKfycby3y1yaUoP4kBAUOwfzL1IWyF2hkmS4ja6Zqyw2QyllcdJEml8xB8a0Rsjiwv_bVBmV/exec')
-      .then(response => response.text())
-      .then(grade => {
-        document.getElementById('grade-value').textContent = grade;
+    document.getElementById('upload-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+      const linkInput = document.getElementById('link-input');
+      const folder = document.getElementById('folder-select').value;
+      const file = fileInput.files[0];
+      const link = linkInput.value.trim();
+      if (!folder) return alert('Please select a folder.');
+      if (!file && !link) return alert('No file or link provided.');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const blob = new Blob([reader.result]);
+          const url = URL.createObjectURL(blob);
+          const name = file.name;
+          window.folders[folder].push({ name, url });
+          saveFolders();
+          refreshFoldersDisplay();
+        };
+        reader.readAsArrayBuffer(file);
+      } else if (link) {
+        let name;
+        try {
+          const urlObj = new URL(link);
+          name = urlObj.pathname.split('/').pop() || urlObj.hostname;
+        } catch (err) {
+          name = link;
+        }
+        window.folders[folder].push({ name, url: link });
+        saveFolders();
+        refreshFoldersDisplay();
+      }
+      fileInput.value = '';
+      linkInput.value = '';
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshFolderSelect();
+      refreshFoldersDisplay();
+    });
+    // Updated Grade Fetching Script with Fixed Template String
+    fetch('https://script.google.com/macros/s/AKfycbxo44kCznno0bGWMVSWJMW-W39dPsEcJRXV4TSpxDuOjEyxxiMGsTw6R1heCbP1sEKl/exec')
+      .then(response => response.json())
+      .then(data => {
+        const num = parseFloat(data.grade);
+        if (!isNaN(num)) {
+          document.getElementById('grade-value').textContent = `${num}%`;
+        } else {
+          document.getElementById('grade-value').textContent = 'Invalid Grade';
+        }
       })
       .catch(error => {
         console.error('Error fetching grade:', error);
