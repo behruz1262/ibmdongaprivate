@@ -6,7 +6,6 @@
   <meta name="description" content="Yuldoshev Behruz's Portfolio and Assignment Manager" />
   <title>Information Management - Yuldoshev Behruz</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <script src="https://apis.google.com/js/api.js"></script>
   <style>
     :root {
       --bg: #f4f4f4;
@@ -80,11 +79,10 @@
 <body>
   <header>
     <h1>Yuldoshev Behruz's Portfolio</h1>
-    <p>Your current grade is: <span id="grade-value">Loading...</span></p>
+    <p id="grade-display"></p>
   </header>
 
   <main>
-    <!-- Folder Management Section -->
     <section aria-labelledby="manage-folders-heading">
       <h2 id="manage-folders-heading"><i class="fas fa-folder"></i> Manage Folders</h2>
       <form id="folder-form" autocomplete="off">
@@ -98,7 +96,6 @@
       </div>
     </section>
 
-    <!-- Assignment Upload Section -->
     <section aria-labelledby="upload-heading">
       <h2 id="upload-heading"><i class="fas fa-file-upload"></i> Upload Assignment</h2>
       <form id="upload-form" enctype="multipart/form-data">
@@ -117,7 +114,6 @@
       </form>
     </section>
 
-    <!-- Uploaded Files Section -->
     <section aria-labelledby="uploaded-files-heading">
       <h2 id="uploaded-files-heading"><i class="fas fa-folder-open"></i> Uploaded Files</h2>
       <div id="folders-container"></div>
@@ -196,15 +192,17 @@
 
       updateUI();
 
-      // Run Apps Script to get the grade
-      google.script.run.withSuccessHandler(function (gradeInfo) {
-        const gradeSpan = document.getElementById("grade-value");
-        gradeSpan.textContent = `${gradeInfo.percentage}% (${gradeInfo.letter})`;
-      }).getCurrentGrade();
+      // Fetch current grade from your Apps Script endpoint
+      fetch("https://script.google.com/macros/s/AKfycbx0gEKBpm57chGxyxsBKCWt0fiTdmKL2ygZ36St9AhnBGzz9JOzM-TCj_Ewxk2b6nSx/exec")
+        .then(res => res.json())
+        .then(gradeInfo => {
+          const gradeDisplay = document.getElementById("grade-display");
+          gradeDisplay.innerHTML = `Your current grade is: <strong>${gradeInfo.percentage}% (${gradeInfo.letter})</strong>`;
+        })
+        .catch(err => {
+          console.error("Failed to fetch grade:", err);
+        });
     });
-
-
   </script>
 </body>
 </html>
-
