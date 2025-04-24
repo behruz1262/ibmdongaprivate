@@ -717,38 +717,24 @@
         Toast.show(`Folder "${folderName}" deleted`);
       },
       
-      fetchGrade() {
-  const webAppUrl = 'https://script.google.com/macros/s/AKfycbw5UUHQ0WXVoY_5TRXH1r2lneSsMIIEz2i4mOJ8x1OjNXOrUEsPSDJVk3w4DVCh4hJw/exec'; // Paste the URL from Step 3
-  
- fetch(webAppUrl)
+     fetchGrade() {
+  fetch('https://script.google.com/macros/s/AKfycbw5UUHQ0WXVoY_5TRXH1r2lneSsMIIEz2i4mOJ8x1OjNXOrUEsPSDJVk3w4DVCh4hJw/exec') // Replace with your deployed Apps Script URL
     .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) {
+        throw new Error('Failed to fetch grade');
+      }
       return response.json();
     })
     .then(data => {
-      console.log('Grade API response:', data);
-
-      if (!data.letterGrade || typeof data.percentage !== 'number') {
-        throw new Error('Invalid grade data format');
-      }
-
-      const gradeText = `${data.letterGrade} (${data.percentage}%)`;
-      updateGradeDisplay(gradeText);
-
-      // Save grade for offline fallback
-      Storage.set('userGrade', {
-        value: gradeText,
-        rawData: data,
-        cachedAt: new Date().toISOString()
-      });
+      const display = `${data.numeric} (${data.letter})`;
+      document.getElementById('grade-value').textContent = display;
     })
     .catch(error => {
       console.error('Error fetching grade:', error);
+      document.getElementById('grade-value').textContent = 'Error loading grade';
+    });
+}
 
-      // Try fallback
-      const cachedGrade = Storage.get('userGrade', { value: 'Grade data unavailable' });
-      updateGradeDisplay(cachedGrade.value);
-   
     });
 }
   </script>
