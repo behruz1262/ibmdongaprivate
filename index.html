@@ -185,6 +185,12 @@
         <h2><i class="fas fa-folder-open"></i> Uploaded Files</h2>
         <div id="folders-container"></div>
       </section>
+<section>
+  <h2><i class="fas fa-graduation-cap"></i> Current Grade</h2>
+  <p id="grade-display">Loading...</p>
+</section>
+
+
     </main>
 
     <div id="toast" class="toast"></div>
@@ -337,6 +343,17 @@
       } else {
         alert("Please upload a file or enter a link.");
       }
+fetch(https://script.google.com/macros/s/AKfycbyVbPSF4UBCfkGpPk_rIYNG8yjUB5TZmwYtVkY5kqRYThXbuDzyB5y9ClBXFlq6O_Py/exec)
+  .then(response => response.text())
+  .then(grade => {
+    document.getElementById("grade-display").textContent = "Your current grade is: " + grade;
+  })
+  .catch(error => {
+    document.getElementById("grade-display").textContent = "Could not load grade.";
+    console.error("Error fetching grade:", error);
+  });
+
+
     });
   </script>
 </body>
