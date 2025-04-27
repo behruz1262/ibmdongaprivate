@@ -174,7 +174,7 @@
     const linkInput = document.getElementById("link-input");
     const foldersContainer = document.getElementById("folders-container");
 
-    const apiUrl = "https://script.google.com/macros/s/AKfycbyQt3Tjr8yp2WED2rLv9eoaQ972nbRPwQI7z1JskAU4w_qJ_RiRiVP1QZXT5JB3DPaKhA/exec";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbxrPuX_3oZexV_UzI3vbAOtMR8JO8jF8CkHBGJVhQIIuc9zT7k992wxP1ZRs5arv7Lf/exec";
 
     async function fetchData() {
       try {
@@ -283,7 +283,7 @@
       e.preventDefault();
       const folderName = document.getElementById("folder-name").value.trim();
       if (folderName) {
-        // Folder creation logic to be implemented
+        // Folder creation logic to be implemented (using Google Sheets)
         showToast("Folder created!");
         renderAll(await fetchData());
         folderForm.reset();
@@ -302,19 +302,14 @@
         const reader = new FileReader();
         reader.onload = async function(event) {
           const base64 = event.target.result.split(",")[1];
-          const params = new URLSearchParams();
-          params.append("folder", selectedFolder);
-          params.append("name", file.name);
-          params.append("url", base64); // Adjust to the URL after uploading file to a service
-
-          await postData(selectedFolder, file.name, "File URL");
+          await postData(selectedFolder, file.name, base64);
           showToast("File uploaded successfully!");
           renderAll(await fetchData());
           uploadForm.reset();
         };
         reader.readAsDataURL(file);
       } else if (link) {
-        await postData(selectedFolder, link, link);
+        await postData(selectedFolder, link.split("/").pop(), link);
         showToast("Link added successfully!");
         renderAll(await fetchData());
         uploadForm.reset();
@@ -330,4 +325,3 @@
   </script>
 </body>
 </html>
-
