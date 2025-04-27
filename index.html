@@ -280,7 +280,7 @@ function showToast(message) {
       }
     });
 
-    uploadForm.addEventListener("submit", e => {
+   uploadForm.addEventListener("submit", async e => {
   e.preventDefault();
   const selectedFolder = folderSelect.value;
   if (!selectedFolder) return alert("Select a folder.");
@@ -289,27 +289,34 @@ function showToast(message) {
   const link = linkInput.value.trim();
 
   if (file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      const base64 = event.target.result.split(',')[1];
 
-    fetch('https://script.google.com/macros/s/AKfycbxvtKxjU-cxw3cKIK92FDQxw_WZP2sPP1bl2fbAr-iVIpP2xG6nr2FJL_w4RAyZpPUmMA/exec', {  // <-- Change this
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.text())
-    .then(url => {
-      data[selectedFolder] = data[selectedFolder] || [];
-      data[selectedFolder].push({ name: file.name, url });
-      saveData();
-      renderAll();
-      uploadForm.reset();
-      showToast("File uploaded successfully!");
-    })
-    .catch(error => {
-      console.error('Upload failed:', error);
-      alert('Failed to upload file.');
-    });
+      const formData = new FormData();
+      formData.append('file', base64);
+      formData.append('filename', file.name);
+
+      fetch('https://script.google.com/macros/s/AKfycbxvtKxjU-cxw3cKIK92FDQxw_WZP2sPP1bl2fbAr-iVIpP2xG6nr2FJL_w4RAyZpPUmMA/exec', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(url => {
+        data[selectedFolder] = data[selectedFolder] || [];
+        data[selectedFolder].push({ name: file.name, url });
+        saveData();
+        renderAll();
+        uploadForm.reset();
+        showToast("File uploaded successfully!");
+      })
+      .catch(error => {
+        console.error('Upload failed:', error);
+        alert('Failed to upload file.');
+      });
+    };
+    reader.readAsDataURL(file);
+
   } else if (link) {
     data[selectedFolder] = data[selectedFolder] || [];
     data[selectedFolder].push({ name: link, url: link });
@@ -321,9 +328,6 @@ function showToast(message) {
     alert("Please upload a file or enter a link.");
   }
 });
-
-      }
-    });
 
     // Initial render
     window.addEventListener("DOMContentLoaded", renderAll);
