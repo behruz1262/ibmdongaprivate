@@ -83,6 +83,18 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.5rem;
+      background: var(--light);
+      padding: 0.5rem;
+      border-radius: 5px;
+    }
+    .file-preview a {
+      color: var(--primary);
+      text-decoration: none;
+      margin-right: auto;
+    }
+    .file-actions {
+      display: flex;
+      gap: 0.5rem;
     }
     .toast {
       position: fixed;
@@ -126,9 +138,23 @@
           <option value="">-- Select Folder --</option>
         </select>
 
-        <label for="file-input">Choose File</label>
-        <input type="file" id="file-input" required />
-        <button type="submit">Upload File</button>
+        <label for="upload-type">Upload Type</label>
+        <select id="upload-type" required>
+          <option value="file">File</option>
+          <option value="link">Link</option>
+        </select>
+
+        <div id="file-upload">
+          <label for="file-input">Choose File</label>
+          <input type="file" id="file-input" />
+        </div>
+
+        <div id="link-upload" style="display: none;">
+          <label for="link-input">Enter Link</label>
+          <input type="url" id="link-input" placeholder="https://example.com" />
+        </div>
+
+        <button type="submit">Upload</button>
       </form>
       <div class="loading" id="loading">Uploading...</div>
     </section>
@@ -142,12 +168,17 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbwNYcjVlDe08SYhY1rvJVH0JmC4FVQix1TGufDxpKzaRHEP8Epsiv_GX2rxiExDcHjDAw/exec"; // replace later
+    const apiUrl = "YOUR_DEPLOYED_SCRIPT_URL"; // Replace later
+
     const folderForm = document.getElementById("folder-form");
     const uploadForm = document.getElementById("upload-form");
     const folderNameInput = document.getElementById("folder-name");
     const folderSelect = document.getElementById("folder-select");
     const fileInput = document.getElementById("file-input");
+    const linkInput = document.getElementById("link-input");
+    const uploadType = document.getElementById("upload-type");
+    const fileUploadDiv = document.getElementById("file-upload");
+    const linkUploadDiv = document.getElementById("link-upload");
     const foldersContainer = document.getElementById("folders-container");
     const loading = document.getElementById("loading");
 
@@ -157,6 +188,20 @@
       toast.style.display = "block";
       setTimeout(() => { toast.style.display = "none"; }, 3000);
     }
+
+    uploadType.addEventListener('change', () => {
+      if (uploadType.value === "file") {
+        fileUploadDiv.style.display = "block";
+        linkUploadDiv.style.display = "none";
+        fileInput.required = true;
+        linkInput.required = false;
+      } else {
+        fileUploadDiv.style.display = "none";
+        linkUploadDiv.style.display = "block";
+        fileInput.required = false;
+        linkInput.required = true;
+      }
+    });
 
     async function fetchData() {
       const res = await fetch(apiUrl + "?action=getData");
@@ -184,12 +229,27 @@
             ${data[folder].map(file => `
               <div class="file-preview">
                 <a href="${file.url}" target="_blank">${file.name}</a>
+                <div class="file-actions">
+                  <button onclick="window.open('${file.url}', '_blank')"><i class="fas fa-eye"></i></button>
+                  <button onclick="deleteFile('${folder}', '${file.name}')"><i class="fas fa-trash"></i></button>
+                </div>
               </div>
             `).join('')}
           </div>
         `;
         foldersContainer.appendChild(folderSection);
       });
+    }
+
+    async function deleteFile(folder, fileName) {
+      if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
+      await fetch(apiUrl + "?action=deleteFile", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folder, fileName })
+      });
+      showToast("Deleted successfully!");
+      await fetchData();
     }
 
     folderForm.addEventListener('submit', async (e) => {
@@ -206,25 +266,48 @@
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const folder = folderSelect.value;
-      const file = fileInput.files[0];
-      if (!folder || !file) {
-        alert("Please select a folder and a file");
+      const type = uploadType.value;
+
+      if (!folder) {
+        alert("Please select a folder");
         return;
       }
 
       loading.style.display = 'block';
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", folder);
+      if (type === "file") {
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please select a file to upload");
+          loading.style.display = 'none';
+          return;
+        }
 
-      await fetch(apiUrl + "?action=uploadFile", {
-        method: "POST",
-        body: formData
-      });
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", folder);
+
+        await fetch(apiUrl + "?action=uploadFile", {
+          method: "POST",
+          body: formData
+        });
+      } else if (type === "link") {
+        const link = linkInput.value.trim();
+        if (!link) {
+          alert("Please enter a valid link");
+          loading.style.display = 'none';
+          return;
+        }
+
+        await fetch(apiUrl + "?action=uploadLink", {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folder, link })
+        });
+      }
 
       loading.style.display = 'none';
-      showToast("File Uploaded!");
+      showToast("Uploaded successfully!");
       uploadForm.reset();
       await fetchData();
     });
