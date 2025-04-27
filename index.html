@@ -165,6 +165,16 @@
   <div id="toast" class="toast"></div>
 
   <script>
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}
+
+
     const folderForm = document.getElementById("folder-form");
     const folderList = document.getElementById("folder-list");
     const folderSelect = document.getElementById("folder-select");
@@ -271,29 +281,47 @@
     });
 
     uploadForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const selectedFolder = folderSelect.value;
-      if (!selectedFolder) return alert("Select a folder.");
+  e.preventDefault();
+  const selectedFolder = folderSelect.value;
+  if (!selectedFolder) return alert("Select a folder.");
 
-      const file = fileInput.files[0];
-      const link = linkInput.value.trim();
+  const file = fileInput.files[0];
+  const link = linkInput.value.trim();
 
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          data[selectedFolder].push({ name: file.name, url: e.target.result });
-          saveData();
-          renderAll();
-          uploadForm.reset();
-        };
-        reader.readAsDataURL(file);
-      } else if (link) {
-        data[selectedFolder].push({ name: link, url: link });
-        saveData();
-        renderAll();
-        uploadForm.reset();
-      } else {
-        alert("Please upload a file or enter a link.");
+  if (file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+
+    fetch('https://script.google.com/macros/s/AKfycbxvtKxjU-cxw3cKIK92FDQxw_WZP2sPP1bl2fbAr-iVIpP2xG6nr2FJL_w4RAyZpPUmMA/exec', {  // <-- Change this
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.text())
+    .then(url => {
+      data[selectedFolder] = data[selectedFolder] || [];
+      data[selectedFolder].push({ name: file.name, url });
+      saveData();
+      renderAll();
+      uploadForm.reset();
+      showToast("File uploaded successfully!");
+    })
+    .catch(error => {
+      console.error('Upload failed:', error);
+      alert('Failed to upload file.');
+    });
+  } else if (link) {
+    data[selectedFolder] = data[selectedFolder] || [];
+    data[selectedFolder].push({ name: link, url: link });
+    saveData();
+    renderAll();
+    uploadForm.reset();
+    showToast("Link added successfully!");
+  } else {
+    alert("Please upload a file or enter a link.");
+  }
+});
+
       }
     });
 
