@@ -87,6 +87,13 @@
       border-radius: 5px;
       display: none;
       z-index: 999;
+      animation: fadeInOut 3s ease forwards;
+    }
+    @keyframes fadeInOut {
+      0% {opacity: 0;}
+      10% {opacity: 1;}
+      90% {opacity: 1;}
+      100% {opacity: 0;}
     }
     .folder-content {
       margin-left: 1rem;
@@ -109,12 +116,6 @@
     .file-preview a {
       color: var(--primary);
       text-decoration: none;
-    }
-    .delete-btn {
-      color: var(--danger);
-      background: none;
-      border: none;
-      cursor: pointer;
     }
   </style>
 
@@ -171,31 +172,11 @@
   <div id="toast" class="toast"></div>
 
 <script>
+  let data = {}; // folders and files will be stored here
+
   window.onload = function() {
-    // Placeholder for filesData
-    const filesData = []; // Later we will load this dynamically
-
-    let data = {};
-
-    filesData.forEach(row => {
-      const folderName = row[0];
-      const fileName = row[1];
-      const fileUrl = row[2];
-      const fileDate = row[3]; 
-
-      if (!data[folderName]) {
-        data[folderName] = [];
-      }
-
-      data[folderName].push({
-        name: fileName,
-        url: fileUrl,
-        date: fileDate
-      });
-    });
-
-    // Render folders if any
     renderFolders(data);
+    document.getElementById("grade-display").textContent = "A+"; // just dummy grade
   };
 
   function renderFolders(data) {
@@ -254,23 +235,64 @@
 
     const folderName = document.getElementById("folder-name").value.trim();
     if (folderName) {
-      addFolder(folderName);
+      if (!data[folderName]) {
+        data[folderName] = [];
+        showToast("Folder created successfully!");
+      } else {
+        showToast("Folder already exists!");
+      }
       document.getElementById("folder-name").value = "";
+      renderFolders(data);
     }
   });
 
-  function addFolder(folderName) {
-    const folderList = document.getElementById("folder-list");
-    const folderSelect = document.getElementById("folder-select");
+  document.getElementById("upload-form").addEventListener("submit", function(event) {
+    event.preventDefault();
 
-    const li = document.createElement("li");
-    li.textContent = folderName;
-    folderList.appendChild(li);
+    const folder = document.getElementById("folder-select").value;
+    const fileInput = document.getElementById("file-input");
+    const linkInput = document.getElementById("link-input").value.trim();
 
-    const opt = document.createElement("option");
-    opt.value = folderName;
-    opt.textContent = folderName;
-    folderSelect.appendChild(opt);
+    if (!folder) {
+      showToast("Please select a folder!");
+      return;
+    }
+
+    let fileName = "";
+    let fileUrl = "";
+
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      fileName = file.name;
+      fileUrl = URL.createObjectURL(file); // Temporary URL (for local preview)
+    } else if (linkInput) {
+      fileName = linkInput.split("/").pop();
+      fileUrl = linkInput;
+    } else {
+      showToast("Please select a file or enter a URL!");
+      return;
+    }
+
+    data[folder].push({
+      name: fileName,
+      url: fileUrl,
+      date: new Date().toLocaleString()
+    });
+
+    fileInput.value = "";
+    document.getElementById("link-input").value = "";
+
+    renderFolders(data);
+    showToast("File uploaded successfully!");
+  });
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.display = "block";
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 3000);
   }
 </script>
 
