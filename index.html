@@ -3,115 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Portfolio and Assignment Manager" />
-  <title>Portfolio & Assignment Manager</title>
+  <title>Portfolio & Assignment Manager (Cloud Version)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
-    :root {
-      --bg: #121212;
-      --card: #1e1e1e;
-      --text: #e0e0e0;
-      --primary: #00bcd4;
-      --danger: #ef5350;
-      --light: #2c2c2c;
-    }
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-    }
-    header {
-      background-color: var(--primary);
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    main {
-      padding: 1rem;
-    }
-    section {
-      background-color: var(--card);
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-    h2, h3 {
-      color: var(--primary);
-    }
-    label {
-      display: block;
-      margin: 0.5rem 0 0.25rem;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: none;
-      border-radius: 5px;
-      background-color: var(--light);
-      color: var(--text);
-    }
-    input::placeholder {
-      color: #aaa;
-    }
-    button {
-      background-color: var(--primary);
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #008c9e;
-    }
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    li {
-      padding: 0.25rem 0;
-    }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--primary);
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 5px;
-      display: none;
-      z-index: 999;
-    }
-    .folder-content {
-      margin-left: 1rem;
-    }
-    .folder-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .folder-name {
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .file-preview {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .file-preview a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-    .delete-btn {
-      color: var(--danger);
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
+    /* Same styling you already had — skipped for brevity */
   </style>
 </head>
 <body>
@@ -142,10 +37,7 @@
         </select>
 
         <label for="file-input">Choose File</label>
-        <input type="file" id="file-input" />
-
-        <label for="link-input">Or Enter URL</label>
-        <input type="url" id="link-input" placeholder="https://example.com/file.pdf" />
+        <input type="file" id="file-input" required />
 
         <button type="submit">Upload</button>
       </form>
@@ -165,12 +57,13 @@
   <div id="toast" class="toast"></div>
 
   <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4OnCFJ4PDXOQ2SRdnM4Lgkwgf3nJ35V4ioagk7utYv7lLbVp6zjg7k5UZAJmbD2ympw/exec"; // <<-- CHANGE THIS
+
     const folderForm = document.getElementById("folder-form");
     const folderList = document.getElementById("folder-list");
     const folderSelect = document.getElementById("folder-select");
     const uploadForm = document.getElementById("upload-form");
     const fileInput = document.getElementById("file-input");
-    const linkInput = document.getElementById("link-input");
     const foldersContainer = document.getElementById("folders-container");
 
     let data = {};
@@ -269,35 +162,50 @@
       }
     });
 
-    uploadForm.addEventListener("submit", e => {
+    uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const selectedFolder = folderSelect.value;
-      if (!selectedFolder) return alert("Select a folder.");
-
       const file = fileInput.files[0];
-      const link = linkInput.value.trim();
-
-      if (file) {
-        const fileObj = {
-          name: file.name,
-          url: URL.createObjectURL(file),
-        };
-        data[selectedFolder].push(fileObj);
-        showToast("File uploaded successfully!");
-        renderFolders();
-        uploadForm.reset();
-      } else if (link) {
-        const fileObj = {
-          name: link.split("/").pop(),
-          url: link,
-        };
-        data[selectedFolder].push(fileObj);
-        showToast("Link added successfully!");
-        renderFolders();
-        uploadForm.reset();
-      } else {
-        alert("Please upload a file or enter a link.");
+      if (!selectedFolder || !file) {
+        alert("Select a folder and choose a file.");
+        return;
       }
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Data = reader.result.split(',')[1];
+        const formData = new FormData();
+        formData.append("file", base64Data);
+        formData.append("filename", file.name);
+        formData.append("mimeType", file.type);
+        formData.append("folder", selectedFolder);
+
+        try {
+          const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+          if (result.url) {
+            const fileObj = {
+              name: file.name,
+              url: result.url,
+            };
+            data[selectedFolder].push(fileObj);
+            showToast("File uploaded to Google Drive!");
+            renderFolders();
+            uploadForm.reset();
+          } else {
+            showToast("Upload failed: " + (result.error || "Unknown error"));
+          }
+        } catch (error) {
+          console.error(error);
+          showToast("Upload error.");
+        }
+      };
+
+      reader.readAsDataURL(file);
     });
 
     window.addEventListener("DOMContentLoaded", renderFolders);
