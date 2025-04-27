@@ -307,6 +307,10 @@
       console.error("Error:", error);
     });
   });
+fetch("https://script.google.com/macros/s/AKfycbxua6pEVvzuzBVokr__vwZPpbWmEdWPvupsR4d8yrAw-E2Fxb9FFfLP4jJqLi_A5J0y/exec", {
+  method: "POST",
+  body: formData,
+})
 
   function showToast(message) {
     const toast = document.getElementById("toast");
