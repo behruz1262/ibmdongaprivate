@@ -171,8 +171,6 @@
   <div id="toast" class="toast"></div>
 
 <script>
-  const serverURL = "https://script.google.com/macros/s/AKfycby9tvtug2V-NbVebhAhtfrYVoMXeM5ehS1vHbpy4mswgFkpDkWp2uHtXSOgTjo4qo4e/exec"; // Replace this with your Web App URL from Google Apps Script
-  
   window.onload = function() {
     // Assuming `files` is passed as a data array from doGet
     const filesData = <?= JSON.stringify(files) ?>;
@@ -250,11 +248,14 @@
     });
   }
 
+  // This is where we handle folder creation and prevent page refresh
   document.getElementById("folder-form").addEventListener("submit", function(event) {
-    event.preventDefault();
+    event.preventDefault();  // Prevent page reload
+
     const folderName = document.getElementById("folder-name").value;
     if (folderName) {
       addFolder(folderName);
+      document.getElementById("folder-name").value = '';  // Clear input after submission
     }
   });
 
@@ -262,16 +263,19 @@
     const folderList = document.getElementById("folder-list");
     const folderSelect = document.getElementById("folder-select");
 
+    // Add to folder list
     const li = document.createElement("li");
     li.textContent = folderName;
     folderList.appendChild(li);
 
+    // Add to select dropdown
     const opt = document.createElement("option");
     opt.value = folderName;
     opt.textContent = folderName;
     folderSelect.appendChild(opt);
   }
 
+  // Handle file upload logic
   document.getElementById("upload-form").addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -313,6 +317,7 @@
     }, 3000);
   }
 </script>
+
 
 </body>
 </html>
