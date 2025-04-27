@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portfolio and Assignment Manager">
   <title>Portfolio & Assignment Manager</title>
-  
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
   <style>
     :root {
@@ -25,6 +26,7 @@
     }
     header {
       background-color: var(--primary);
+      color: white;
       padding: 1rem;
       text-align: center;
     }
@@ -36,11 +38,10 @@
       border-radius: 10px;
       padding: 1rem;
       margin-bottom: 1.5rem;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     h2, h3 {
       color: var(--primary);
-      margin-bottom: 0.5rem;
     }
     label {
       display: block;
@@ -50,60 +51,39 @@
       width: 100%;
       padding: 0.5rem;
       margin-bottom: 1rem;
-      border-radius: 5px;
       border: none;
+      border-radius: 5px;
       background-color: var(--light);
       color: var(--text);
-    }
-    input::placeholder {
-      color: #999;
     }
     button {
       background-color: var(--primary);
       color: white;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background-color 0.3s ease;
     }
     button:hover {
-      background-color: #008b9c;
+      background-color: #008c9e;
     }
-    .file-item {
+    .file-preview {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background-color: var(--light);
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      border-radius: 5px;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #333;
     }
-    .file-item a {
+    .file-preview a {
       color: var(--primary);
       text-decoration: none;
-      word-break: break-word;
     }
-    .file-item button {
+    .delete-btn {
       background: none;
-      color: var(--danger);
       border: none;
-      cursor: pointer;
-      font-size: 1.1rem;
-    }
-    .folder-section {
-      margin-top: 1rem;
-    }
-    .folder-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .folder-header button {
-      background: none;
       color: var(--danger);
-      border: none;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
     }
-    #toast {
+    .toast {
       position: fixed;
       bottom: 20px;
       left: 50%;
@@ -111,7 +91,7 @@
       background: var(--primary);
       color: white;
       padding: 1rem 2rem;
-      border-radius: 10px;
+      border-radius: 5px;
       display: none;
       z-index: 999;
     }
@@ -119,176 +99,109 @@
 </head>
 
 <body>
+
   <header>
     <h1>Portfolio & Assignment Manager</h1>
   </header>
 
   <main>
     <section>
-      <h2>Create Folder</h2>
-      <form id="create-folder-form">
-        <label>Folder Name</label>
-        <input type="text" id="folder-name" placeholder="Enter folder name" required />
-        <button type="submit">Create Folder</button>
-      </form>
-    </section>
-
-    <section>
-      <h2>Upload File or Link</h2>
+      <h2><i class="fas fa-upload"></i> Upload</h2>
       <form id="upload-form">
-        <label>Select Folder</label>
-        <select id="folder-select" required>
-          <option value="">-- Select Folder --</option>
-        </select>
-
-        <label>Choose a File</label>
+        <label for="file-input">Choose File</label>
         <input type="file" id="file-input" />
 
-        <label>Or Enter a URL</label>
-        <input type="url" id="url-input" placeholder="https://example.com/assignment.pdf" />
+        <label for="link-input">Or Enter Link</label>
+        <input type="url" id="link-input" placeholder="https://example.com/file.pdf" />
 
         <button type="submit">Upload</button>
       </form>
     </section>
 
     <section>
-      <h2>Uploaded Files</h2>
-      <div id="folders-container"></div>
+      <h2><i class="fas fa-folder-open"></i> Files</h2>
+      <div id="files-container"></div>
     </section>
-
-    <div id="toast"></div>
   </main>
 
+  <div id="toast" class="toast"></div>
+
   <script>
-    let data = {};
+    const serverURL = "https://script.google.com/macros/s/AKfycby9tvtug2V-NbVebhAhtfrYVoMXeM5ehS1vHbpy4mswgFkpDkWp2uHtXSOgTjo4qo4e/exec"; // <--- Put your Web App URL here
 
-    window.onload = () => {
-      const stored = localStorage.getItem('portfolioData');
-      if (stored) data = JSON.parse(stored);
-      render();
-    };
+    document.addEventListener('DOMContentLoaded', loadFiles);
 
-    function saveData() {
-      localStorage.setItem('portfolioData', JSON.stringify(data));
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, 3000);
-    }
-
-    function render() {
-      const folderSelect = document.getElementById('folder-select');
-      const container = document.getElementById('folders-container');
-      folderSelect.innerHTML = '<option value="">-- Select Folder --</option>';
-      container.innerHTML = '';
-
-      for (const folder in data) {
-        const section = document.createElement('div');
-        section.className = 'folder-section';
-
-        const header = document.createElement('div');
-        header.className = 'folder-header';
-
-        const title = document.createElement('h3');
-        title.textContent = folder;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.onclick = () => {
-          delete data[folder];
-          saveData();
-          render();
-          showToast('Folder deleted!');
-        };
-
-        header.appendChild(title);
-        header.appendChild(deleteBtn);
-        section.appendChild(header);
-
-        data[folder].forEach((file, index) => {
-          const fileDiv = document.createElement('div');
-          fileDiv.className = 'file-item';
-
-          const link = document.createElement('a');
-          link.href = file.url;
-          link.target = '_blank';
-          link.textContent = file.name;
-
-          const delBtn = document.createElement('button');
-          delBtn.innerHTML = '<i class="fas fa-trash"></i>';
-          delBtn.onclick = () => {
-            data[folder].splice(index, 1);
-            if (data[folder].length === 0) delete data[folder];
-            saveData();
-            render();
-            showToast('File deleted!');
-          };
-
-          fileDiv.appendChild(link);
-          fileDiv.appendChild(delBtn);
-          section.appendChild(fileDiv);
-        });
-
-        container.appendChild(section);
-
-        const option = document.createElement('option');
-        option.value = folder;
-        option.textContent = folder;
-        folderSelect.appendChild(option);
-      }
-    }
-
-    document.getElementById('create-folder-form').addEventListener('submit', function(e) {
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('folder-name').value.trim();
-      if (name && !data[name]) {
-        data[name] = [];
-        saveData();
-        render();
-        showToast('Folder created!');
-      } else {
-        showToast('Folder already exists or invalid!');
-      }
-      this.reset();
-    });
 
-    document.getElementById('upload-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const folder = document.getElementById('folder-select').value;
       const fileInput = document.getElementById('file-input');
-      const urlInput = document.getElementById('url-input');
-
-      if (!folder) {
-        showToast('Please select a folder!');
-        return;
-      }
-
-      let name = '';
-      let url = '';
+      const linkInput = document.getElementById('link-input');
 
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        name = file.name;
-        url = URL.createObjectURL(file);
-      } else if (urlInput.value.trim()) {
-        url = urlInput.value.trim();
-        name = url.split('/').pop();
+        const reader = new FileReader();
+        reader.onload = async function(evt) {
+          const base64Data = evt.target.result.split(',')[1];
+          await uploadFile(base64Data, file.name);
+        };
+        reader.readAsDataURL(file);
+      } else if (linkInput.value.trim() !== '') {
+        await uploadLink(linkInput.value, "Link-" + Date.now());
       } else {
-        showToast('Please select a file or enter a URL!');
-        return;
+        showToast("Please select a file or enter a link.");
       }
-
-      data[folder].push({ name, url });
-      saveData();
-      render();
-      showToast('File uploaded!');
-      this.reset();
     });
+
+    async function loadFiles() {
+      const res = await fetch(`${serverURL}?action=list`);
+      const files = await res.json();
+      const container = document.getElementById('files-container');
+      container.innerHTML = "";
+
+      files.forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'file-preview';
+        div.innerHTML = `
+          <a href="${file.url}" target="_blank">${file.name}</a>
+          <button class="delete-btn" onclick="deleteFile('${file.id}')"><i class="fas fa-trash"></i></button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function uploadFile(data, name) {
+      await fetch(serverURL + "?action=uploadFile", {
+        method: "POST",
+        body: JSON.stringify({ data, name })
+      });
+      showToast("File uploaded!");
+      document.getElementById('file-input').value = '';
+      loadFiles();
+    }
+
+    async function uploadLink(link, name) {
+      await fetch(serverURL + "?action=uploadLink", {
+        method: "POST",
+        body: JSON.stringify({ link, name })
+      });
+      showToast("Link uploaded!");
+      document.getElementById('link-input').value = '';
+      loadFiles();
+    }
+
+    async function deleteFile(fileId) {
+      await fetch(`${serverURL}?action=delete&fileId=${fileId}`);
+      showToast("File deleted!");
+      loadFiles();
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3000);
+    }
   </script>
+
 </body>
 </html>
