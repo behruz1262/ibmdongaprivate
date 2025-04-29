@@ -59,52 +59,50 @@
   </section>
 
   <script>
-    // Handle File Upload
-    document.getElementById('uploadForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const folderName = document.getElementById('folderName').value.trim();
-      const fileUpload = document.getElementById('fileUpload').files[0];
-      const fileURL = document.getElementById('fileURL').value.trim();
-      const fileList = document.getElementById('fileList');
+  // Handle File Upload
+  document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const folderName = document.getElementById('folderName').value.trim();
+    const fileUpload = document.getElementById('fileUpload').files[0];
+    const fileURL = document.getElementById('fileURL').value.trim();
+    const fileList = document.getElementById('fileList');
 
-      if (!folderName) {
-        alert('Please enter a folder name.');
-        return;
-      }
+    if (!folderName) {
+      alert('Please enter a folder name.');
+      return;
+    }
 
-      let listItem = document.createElement('li');
-      listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
+    let listItem = document.createElement('li');
+    listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
 
-      if (fileUpload) {
-        listItem.innerHTML = `<span>${folderName}/${fileUpload.name}</span><span class="text-green-400">Uploaded</span>`;
-      } else if (fileURL) {
-        listItem.innerHTML = `<a href="${fileURL}" target="_blank" class="text-teal-300 hover:underline">${folderName}/[Link]</a><span class="text-green-400">URL Added</span>`;
-      } else {
-        alert('Please upload a file or enter a file URL.');
-        return;
-      }
+    if (fileUpload) {
+      listItem.innerHTML = `<span>${folderName}/${fileUpload.name}</span><span class="text-green-400">Uploaded</span>`;
+    } else if (fileURL) {
+      listItem.innerHTML = `<a href="${fileURL}" target="_blank" class="text-teal-300 hover:underline">${folderName}/[Link]</a><span class="text-green-400">URL Added</span>`;
+    } else {
+      alert('Please upload a file or enter a file URL.');
+      return;
+    }
 
-      fileList.appendChild(listItem);
+    fileList.appendChild(listItem);
+    document.getElementById('uploadForm').reset();
+  });
 
-      document.getElementById('uploadForm').reset();
-    });
+  // Fetch current grade
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch("https://script.google.com/macros/s/AKfycbzqab4J8IJtl2aBdo5VQBKB0o-uz0Dh6I5tKiuymalQSBFmEavrDaJKFqoXKFc0klqz/exec?name=Yuldoshev%20Behruz")
+      .then(res => res.text())
+      .then(data => {
+        console.log("Fetched grade:", data); // Correct place for console.log
+        document.getElementById('currentGrade').textContent = data;
+      })
+      .catch(err => {
+        document.getElementById('currentGrade').textContent = "Error fetching grade";
+        console.error("Fetch error:", err);
+      });
+  });
+</script>
 
-    document.addEventListener('DOMContentLoaded', function () {
-  fetch("https://script.google.com/macros/s/AKfycbzqab4J8IJtl2aBdo5VQBKB0o-uz0Dh6I5tKiuymalQSBFmEavrDaJKFqoXKFc0klqz/exec?name=Yuldoshev%20Behruz")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById('currentGrade').textContent = data;
-    })
-console.log("Fetched grade:", data); // <-- Add this
-      document.getElementById('currentGrade').textContent = data;
-    .catch(err => {
-      document.getElementById('currentGrade').textContent = "Error fetching grade";
-      console.error(err);
-    });
-});
-
-    });
-  </script>
 
 </body>
 </html>
