@@ -95,6 +95,8 @@
     .then(data => {
       document.getElementById('currentGrade').textContent = data;
     })
+console.log("Fetched grade:", data); // <-- Add this
+      document.getElementById('currentGrade').textContent = data;
     .catch(err => {
       document.getElementById('currentGrade').textContent = "Error fetching grade";
       console.error(err);
