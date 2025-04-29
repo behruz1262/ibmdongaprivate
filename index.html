@@ -9,36 +9,32 @@
 </head>
 <body class="bg-gray-950 text-white min-h-screen p-6 space-y-8">
 
-  <!-- Google Drive Folder Link at Top -->
+  <!-- Google Drive Folder Link -->
   <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg mb-6">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400"><i class="fab fa-google-drive mr-2"></i>Shared Google Drive Folder</h2>
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">
+      <i class="fab fa-google-drive mr-2"></i>Shared Google Drive Folder
+    </h2>
     <a href="https://drive.google.com/drive/folders/1jWcKBJia1fmf9PWap4nsJ1hYVb0EPZ7z?hl=ko" target="_blank"
-      class="text-teal-300 hover:underline break-all text-lg">
-      📂 Open Shared Drive
-    </a>
+      class="text-teal-300 hover:underline break-all text-lg">📂 Open Shared Drive</a>
   </section>
 
-  <!-- Page Header -->
+  <!-- Header -->
   <header class="text-center">
     <h1 class="text-4xl font-bold mb-2 text-teal-400">Student Portfolio</h1>
     <p class="text-gray-400">Manage Assignments and View Grades</p>
   </header>
 
-  <!-- Upload Section -->
+  <!-- Upload Form -->
   <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
     <h2 class="text-2xl font-bold mb-3 text-teal-400">Upload Assignment</h2>
     <form id="uploadForm" class="space-y-4">
       <div>
         <label class="block mb-1 text-gray-300" for="folderName">Folder Name</label>
-        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Enter folder name" required>
+        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Enter folder name" required />
       </div>
       <div>
         <label class="block mb-1 text-gray-300" for="fileUpload">Upload File</label>
-        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white">
-      </div>
-      <div>
-        <label class="block mb-1 text-gray-300" for="fileURL">Or Enter File URL</label>
-        <input type="url" id="fileURL" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="https://example.com/file.pdf">
+        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white" required />
       </div>
       <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded">
         Upload
@@ -46,71 +42,71 @@
     </form>
   </section>
 
-  <!-- Uploaded Files Section -->
+  <!-- Uploaded Files -->
   <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
     <h2 class="text-2xl font-bold mb-3 text-teal-400">Uploaded Files</h2>
     <ul id="fileList" class="space-y-2"></ul>
   </section>
 
-  <!-- Current Grade Section -->
+  <!-- Current Grade -->
   <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
     <h2 class="text-2xl font-bold mb-3 text-teal-400">Current Grade</h2>
     <div id="currentGrade" class="text-2xl font-semibold text-green-400">Loading...</div>
   </section>
 
+  <!-- Scripts -->
   <script>
-    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    // Upload form handling
+    document.getElementById('uploadForm').addEventListener('submit', async function (event) {
       event.preventDefault();
 
       const folderName = document.getElementById('folderName').value.trim();
-      const fileUpload = document.getElementById('fileUpload').files[0];
-      const fileURL = document.getElementById('fileURL').value.trim();
+      const fileInput = document.getElementById('fileUpload');
+      const file = fileInput.files[0];
       const fileList = document.getElementById('fileList');
 
-      if (!folderName) {
-        alert('Please enter a folder name.');
+      if (!folderName || !file) {
+        alert('Please provide a folder name and select a file.');
         return;
       }
 
-      if (fileUpload) {
-        const reader = new FileReader();
-        reader.onload = function () {
-          const base64Data = reader.result.split(',')[1];
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const base64Data = reader.result.split(',')[1];
 
-          fetch("https://script.google.com/macros/s/AKfycbw7rzfO3AkoSwb0m4A8lODwJQbQxMslukMK28ShhoNGqsVJ77Bir2TvS16synSslXG6/exec", {
+        const formData = new FormData();
+        formData.append('filename', folderName + '-' + file.name);
+        formData.append('mimeType', file.type);
+        formData.append('file', base64Data);
+
+        try {
+          const response = await fetch('https://script.google.com/macros/s/AKfycbw7rzfO3AkoSwb0m4A8lODwJQbQxMslukMK28ShhoNGqsVJ77Bir2TvS16synSslXG6/exec', {
             method: 'POST',
-            body: new URLSearchParams({
-              file: base64Data,
-              filename: folderName + "-" + fileUpload.name,
-              mimeType: fileUpload.type
-            })
-          })
-          .then(res => res.text())
-          .then(fileLink => {
-            const listItem = document.createElement('li');
-            listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
-            listItem.innerHTML = `<a href="${fileLink}" target="_blank" class="text-teal-300 hover:underline">${folderName}/${fileUpload.name}</a><span class="text-green-400">Uploaded</span>`;
-            fileList.appendChild(listItem);
-          })
-          .catch(err => {
-            console.error('Upload failed:', err);
-            alert('Upload failed.');
+            body: formData
           });
-        };
-        reader.readAsDataURL(fileUpload);
-      } else if (fileURL) {
-        const listItem = document.createElement('li');
-        listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
-        listItem.innerHTML = `<a href="${fileURL}" target="_blank" class="text-teal-300 hover:underline">${folderName}/[Link]</a><span class="text-green-400">URL Added</span>`;
-        fileList.appendChild(listItem);
-      } else {
-        alert('Please upload a file or enter a file URL.');
-        return;
-      }
 
-      document.getElementById('uploadForm').reset();
+          const fileUrl = await response.text();
+
+          const listItem = document.createElement('li');
+          listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
+          listItem.innerHTML = `
+            <a href="${fileUrl}" target="_blank" class="text-teal-300 hover:underline">
+              ${folderName}/${file.name}
+            </a>
+            <span class="text-green-400">Uploaded</span>
+          `;
+          fileList.appendChild(listItem);
+
+          document.getElementById('uploadForm').reset();
+        } catch (error) {
+          alert('Upload failed. Please try again.');
+          console.error('Upload error:', error);
+        }
+      };
+      reader.readAsDataURL(file);
     });
 
+    // Grade fetcher
     document.addEventListener('DOMContentLoaded', function () {
       fetch("https://script.google.com/macros/s/AKfycbzqab4J8IJtl2aBdo5VQBKB0o-uz0Dh6I5tKiuymalQSBFmEavrDaJKFqoXKFc0klqz/exec?name=Yuldoshev%20Behruz")
         .then(res => res.text())
@@ -123,6 +119,5 @@
         });
     });
   </script>
-
 </body>
 </html>
