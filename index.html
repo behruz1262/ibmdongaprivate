@@ -5,98 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Student Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#14b8a6', // teal-500
-            secondary: '#0f172a', // slate-900
-            card: '#1e293b', // slate-800
-            border: '#334155', // slate-700
-          }
-        }
-      }
-    };
-  </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-secondary text-white min-h-screen p-6 space-y-10 font-sans">
+<body class="bg-gray-950 text-white min-h-screen p-6 space-y-8">
+
+  <!-- Google Drive Folder Link -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg mb-6">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">
+      <i class="fab fa-google-drive mr-2"></i>Shared Google Drive Folder
+    </h2>
+    <a href="https://drive.google.com/drive/folders/1jWcKBJia1fmf9PWap4nsJ1hYVb0EPZ7z?hl=ko" target="_blank"
+      class="text-teal-300 hover:underline break-all text-lg">📂 Open Shared Drive</a>
+  </section>
 
   <!-- Header -->
-  <header class="text-center space-y-2">
-    <h1 class="text-5xl font-extrabold text-primary">Student Portfolio</h1>
-    <p class="text-gray-400 text-lg">Securely upload and preview your assignments</p>
+  <header class="text-center">
+    <h1 class="text-4xl font-bold mb-2 text-teal-400">Student Portfolio</h1>
+    <p class="text-gray-400">Manage Assignments and View Grades</p>
   </header>
 
-  <!-- Upload Section -->
-  <section class="bg-card rounded-2xl shadow-lg p-6 max-w-3xl mx-auto space-y-6">
-    <h2 class="text-2xl font-bold text-primary">Upload Assignment</h2>
+  <!-- Upload Form -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">Upload Assignment</h2>
     <form id="uploadForm" class="space-y-4">
       <div>
-        <label for="folderName" class="block text-sm mb-1 text-gray-300">Folder Name</label>
-        <input type="text" id="folderName" class="w-full px-4 py-2 rounded bg-secondary text-white border border-border focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter folder name" required />
+        <label class="block mb-1 text-gray-300" for="folderName">Folder Name</label>
+        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Enter folder name" required />
       </div>
       <div>
-        <label for="fileUpload" class="block text-sm mb-1 text-gray-300">Upload File</label>
-        <input type="file" id="fileUpload" class="w-full px-4 py-2 rounded bg-secondary text-white border border-border focus:outline-none focus:ring-2 focus:ring-primary" required />
+        <label class="block mb-1 text-gray-300" for="fileUpload">Upload File</label>
+        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white" />
       </div>
-      <button type="submit" class="w-full py-2 bg-primary hover:bg-teal-600 text-white font-bold rounded transition">
+      <div>
+        <label class="block mb-1 text-gray-300" for="fileLink">or Upload by Link</label>
+        <input type="url" id="fileLink" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Paste public file URL here" />
+      </div>
+      <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded">
         Upload
       </button>
     </form>
   </section>
 
   <!-- Uploaded Files -->
-  <section class="bg-card rounded-2xl shadow-lg p-6 max-w-3xl mx-auto space-y-4">
-    <h2 class="text-2xl font-bold text-primary mb-2">Uploaded Files</h2>
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">Uploaded Files</h2>
     <ul id="fileList" class="space-y-2"></ul>
   </section>
 
-  <!-- Script -->
+  <!-- Current Grade -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">Current Grade</h2>
+    <div id="currentGrade" class="text-2xl font-semibold text-green-400">Loading...</div>
+  </section>
+
+  <!-- Scripts -->
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwUseKu14L_kmA9KPVngixxL30vKNL6aAWVp4mjkHzwUiPi_BwgULQqE2YEspmiIyQYSg/exec';
 
     document.getElementById('uploadForm').addEventListener('submit', async function (event) {
       event.preventDefault();
-
       const folderName = document.getElementById('folderName').value.trim();
       const fileInput = document.getElementById('fileUpload');
       const file = fileInput.files[0];
+      const fileLink = document.getElementById('fileLink').value.trim();
       const fileList = document.getElementById('fileList');
 
-      if (!folderName || !file) {
-        alert('Please provide a folder name and select a file.');
+      if (!folderName || (!file && !fileLink)) {
+        alert('Please provide a folder name and either upload a file or provide a link.');
         return;
       }
 
-      const formData = new FormData();
-      formData.append('filename', `${folderName}-${file.name}`);
-      formData.append('file', file);
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async function () {
+          const base64Data = reader.result.split(',')[1];
 
-      try {
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          body: formData
-        });
+          const formData = new FormData();
+          formData.append('folderName', folderName);
+          formData.append('filename', file.name);
+          formData.append('mimeType', file.type);
+          formData.append('file', base64Data);
 
-        const fileId = await response.text();
-        const previewLink = `https://drive.google.com/file/d/${fileId}/preview`;
+          try {
+            const response = await fetch(scriptURL, {
+              method: 'POST',
+              body: formData
+            });
 
-        const li = document.createElement('li');
-        li.className = 'bg-secondary p-4 rounded-lg flex justify-between items-center border border-border';
-        li.innerHTML = `
-          <a href="${previewLink}" target="_blank" class="text-teal-300 hover:underline truncate w-4/5">
-            ${folderName}/${file.name}
-          </a>
-          <span class="text-green-400 font-medium">Uploaded</span>
+            const fileUrl = await response.text();
+            if (fileUrl.startsWith('ERROR')) throw new Error(fileUrl);
+
+            const listItem = document.createElement('li');
+            listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
+            listItem.innerHTML = `
+              <a href="${fileUrl}" target="_blank" class="text-teal-300 hover:underline">${folderName}/${file.name}</a>
+              <button class="text-red-400 hover:text-red-600" onclick="deleteFile('${fileUrl}', this)">🗑️ Delete</button>
+            `;
+            fileList.appendChild(listItem);
+            document.getElementById('uploadForm').reset();
+          } catch (error) {
+            alert('Upload failed. Please try again.');
+            console.error('Upload error:', error);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else if (fileLink) {
+        const listItem = document.createElement('li');
+        listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
+        listItem.innerHTML = `
+          <a href="${fileLink}" target="_blank" class="text-teal-300 hover:underline">${folderName}/Linked File</a>
+          <button class="text-red-400 hover:text-red-600" onclick="deleteFile('${fileLink}', this)">🗑️ Delete</button>
         `;
-        fileList.prepend(li);
+        fileList.appendChild(listItem);
         document.getElementById('uploadForm').reset();
-      } catch (error) {
-        alert('Upload failed. Please try again.');
-        console.error('Upload error:', error);
       }
     });
+
+    function deleteFile(fileUrl, button) {
+      // Logic for deleting file from Google Drive or simply removing it from list
+      console.log('Deleting file: ', fileUrl);
+      button.parentElement.remove();
+    }
   </script>
 </body>
 </html>
