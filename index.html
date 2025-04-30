@@ -1,110 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Student Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-950 text-white min-h-screen p-6 space-y-8">
+<body class="bg-gray-950 text-white min-h-screen p-6 space-y-10">
 
-  <!-- Google Drive Folder Link at Top -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg mb-6">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400"><i class="fab fa-google-drive mr-2"></i>Shared Google Drive Folder</h2>
-    <a href="https://drive.google.com/drive/folders/1b1nvtb1UHH_jYu4qZXmcvhm3AHUjqvoM?usp=sharing" target="_blank"
-      class="text-teal-300 hover:underline break-all text-lg">
-      📂 Open Shared Drive
-    </a>
-  </section>
-
-  <!-- Page Header -->
-  <header class="text-center">
-    <h1 class="text-4xl font-bold mb-2 text-teal-400">Student Portfolio</h1>
-    <p class="text-gray-400">Manage Assignments and View Grades</p>
+  <!-- Header -->
+  <header class="text-center space-y-2">
+    <h1 class="text-4xl font-bold text-teal-400">Student Portfolio</h1>
+    <p class="text-gray-400">Upload Assignments, Share Links, and Track Grades</p>
   </header>
 
-  <!-- Upload Section -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400">Upload Assignment</h2>
-    <form id="uploadForm" class="space-y-4">
-      <div>
+  <!-- Upload Form -->
+  <section class="bg-gray-900 rounded-xl px-6 py-5 shadow-lg space-y-5">
+    <h2 class="text-2xl font-bold text-teal-400 mb-2">Upload Assignment</h2>
+    <form id="uploadForm" class="grid gap-4 sm:grid-cols-2">
+      <div class="col-span-2">
         <label class="block mb-1 text-gray-300" for="folderName">Folder Name</label>
-        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Enter folder name" required>
+        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="e.g. Week 7" required />
       </div>
       <div>
         <label class="block mb-1 text-gray-300" for="fileUpload">Upload File</label>
-        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white">
+        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white" />
       </div>
       <div>
-        <label class="block mb-1 text-gray-300" for="fileURL">Or Enter File URL</label>
-        <input type="url" id="fileURL" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="https://example.com/file.pdf">
+        <label class="block mb-1 text-gray-300" for="linkUrl">Or Paste Link</label>
+        <input type="url" id="linkUrl" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="https://..." />
       </div>
-      <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded">
-        Upload
-      </button>
+      <div class="col-span-2">
+        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded">
+          Upload
+        </button>
+      </div>
     </form>
   </section>
 
-  <!-- Uploaded Files Section -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400">Uploaded Files</h2>
-    <ul id="fileList" class="space-y-2"></ul>
+  <!-- Uploaded Files -->
+  <section class="bg-gray-900 rounded-xl px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold text-teal-400 mb-3">Uploaded Files & Links</h2>
+    <ul id="fileList" class="space-y-3"></ul>
   </section>
 
-  <!-- Current Grade Section -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400">Current Grade</h2>
-    <div id="currentGrade" class="text-2xl font-semibold text-green-400">Loading...</div>
+  <!-- Week 7 Section -->
+  <section class="bg-gray-900 rounded-xl px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold text-teal-400 mb-3">📁 Week 7</h2>
+    <ul class="space-y-2">
+      <li>
+        <a href="https://docs.google.com/document/d/1nd-Nu67PuCMdnUaTqWgbAjClt9EKEaBc/edit?usp=sharing" target="_blank" class="text-teal-300 hover:underline">
+          📄 Google Docs: Week 7 Assignment
+        </a>
+      </li>
+      <li>
+        <a href="https://behruz1262.github.io/encryption-decryption-tool" target="_blank" class="text-teal-300 hover:underline">
+          🔐 Encryption-Decryption Tool
+        </a>
+      </li>
+    </ul>
   </section>
 
+  <!-- Scripts -->
   <script>
-    // Handle File Upload
-    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwUseKu14L_kmA9KPVngixxL30vKNL6aAWVp4mjkHzwUiPi_BwgULQqE2YEspmiIyQYSg/exec";
+    const fileList = document.getElementById('fileList');
+
+    async function loadFiles() {
+      fileList.innerHTML = "<li>Loading...</li>";
+      try {
+        const res = await fetch(scriptURL);
+        const files = await res.json();
+        fileList.innerHTML = '';
+        files.forEach(file => {
+          const li = document.createElement('li');
+          li.className = "bg-gray-800 p-3 rounded flex justify-between items-center";
+          li.innerHTML = `
+            <a href="${file.url}" target="_blank" class="text-teal-300 hover:underline">${file.name}</a>
+            <button class="text-red-400 hover:text-red-600" onclick="deleteFile('${file.id}')">Delete</button>
+          `;
+          fileList.appendChild(li);
+        });
+      } catch (err) {
+        fileList.innerHTML = "<li class='text-red-500'>Failed to load files.</li>";
+      }
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async function (event) {
       event.preventDefault();
-      const folderName = document.getElementById('folderName').value.trim();
-      const fileUpload = document.getElementById('fileUpload').files[0];
-      const fileURL = document.getElementById('fileURL').value.trim();
-      const fileList = document.getElementById('fileList');
+      const folder = document.getElementById('folderName').value.trim();
+      const fileInput = document.getElementById('fileUpload');
+      const file = fileInput.files[0];
+      const linkUrl = document.getElementById('linkUrl').value.trim();
 
-      if (!folderName) {
-        alert('Please enter a folder name.');
+      if (!folder || (!file && !linkUrl)) {
+        alert("Please provide a folder and either a file or a link.");
         return;
       }
 
-      let listItem = document.createElement('li');
-      listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
+      const formData = new FormData();
+      formData.append('folder', folder);
 
-      if (fileUpload) {
-        listItem.innerHTML = `<span>${folderName}/${fileUpload.name}</span><span class="text-green-400">Uploaded</span>`;
-      } else if (fileURL) {
-        listItem.innerHTML = `<a href="${fileURL}" target="_blank" class="text-teal-300 hover:underline">${folderName}/[Link]</a><span class="text-green-400">URL Added</span>`;
-      } else {
-        alert('Please upload a file or enter a file URL.');
-        return;
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async function () {
+          const base64 = reader.result.split(',')[1];
+          formData.append('filename', file.name);
+          formData.append('mimeType', file.type);
+          formData.append('file', base64);
+
+          try {
+            await fetch(scriptURL, { method: "POST", body: formData });
+            loadFiles();
+            document.getElementById('uploadForm').reset();
+          } catch (err) {
+            alert("Upload failed.");
+          }
+        };
+        reader.readAsDataURL(file);
+      } else if (linkUrl) {
+        formData.append('link', linkUrl);
+        formData.append('filename', folder + "-link");
+        try {
+          await fetch(scriptURL, { method: "POST", body: formData });
+          loadFiles();
+          document.getElementById('uploadForm').reset();
+        } catch (err) {
+          alert("Link upload failed.");
+        }
       }
-
-      fileList.appendChild(listItem);
-
-      document.getElementById('uploadForm').reset();
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-  fetch("https://script.google.com/macros/s/AKfycbzqab4J8IJtl2aBdo5VQBKB0o-uz0Dh6I5tKiuymalQSBFmEavrDaJKFqoXKFc0klqz/exec?name=Yuldoshev%20Behruz")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById('currentGrade').textContent = data;
-    })
-console.log("Fetched grade:", data); // <-- Add this
-      document.getElementById('currentGrade').textContent = data;
-    .catch(err => {
-      document.getElementById('currentGrade').textContent = "Error fetching grade";
-      console.error(err);
-    });
-});
+    async function deleteFile(fileId) {
+      if (!confirm("Are you sure you want to delete this file?")) return;
+      try {
+        await fetch(scriptURL + "?delete=" + fileId);
+        loadFiles();
+      } catch (err) {
+        alert("Delete failed.");
+      }
+    }
 
-    });
+    loadFiles();
   </script>
-
 </body>
 </html>
