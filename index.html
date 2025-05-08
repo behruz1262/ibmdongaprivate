@@ -37,17 +37,11 @@
     </div>
   </section>
 
-  <!-- File Uploads -->
-  <section class="bg-gray-900 rounded-lg p-6 shadow">
-    <h2 class="text-2xl font-bold mb-4 text-teal-400">📂 Uploaded Items</h2>
-    <ul id="fileList" class="space-y-2"></ul>
-  </section>
-
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwQxPjDzQwJXzy5XjucjwlJhcDEvPI_OyDKITp_VxfMRRK-cX9QcQiyS4KEhSHnD5SvJg/exec";
 
-    // Load total grade
-    fetch(API_URL + "?action=getTotalGrade")
+    // Load current grade percentage
+    fetch(`${API_URL}?action=getTotalGrade`)
       .then(res => res.text())
       .then(data => {
         document.getElementById("currentGrade").textContent = data;
@@ -56,12 +50,11 @@
         document.getElementById("currentGrade").textContent = "Error loading grade.";
       });
 
-    // Load grade table
-    fetch(API_URL + "?action=getGrades")
+    // Load grade table data
+    fetch(`${API_URL}?action=getGrades`)
       .then(res => res.json())
       .then(data => {
         const table = document.getElementById("gradesTable");
-        table.innerHTML = "";
         data.forEach(row => {
           const percentage = ((Number(row.grade_received) / Number(row.max_grade)) * 100).toFixed(2);
           table.innerHTML += `
@@ -75,32 +68,7 @@
           `;
         });
       });
-
-    // Simulated uploaded file list (replace with real API call if needed)
-    const uploadedFiles = [
-      {"id":0,"name":"Current Attendence","url":"Attendence","folder":15,"timestamp":15},
-      {"id":1,"name":"Week 2 - Find Me!","url":"assignment","folder":1.75,"timestamp":3},
-      {"id":2,"name":"Week 3 - CLI","url":"assignment","folder":2.75,"timestamp":3},
-      {"id":3,"name":"Week 4 - Quiz 1","url":"quiz","folder":4,"timestamp":5},
-      {"id":4,"name":"Week 4 - Virtual Library","url":"assignment ","folder":2.5,"timestamp":3},
-      {"id":5,"name":"Week 5 - Idea sourcing","url":"assignment","folder":3,"timestamp":3},
-      {"id":6,"name":"Week 6 - Crypto","url":"project","folder":4,"timestamp":10},
-      {"id":7,"name":"Week 7 - AS","url":"assignment ","folder":2.75,"timestamp":3}
-    ];
-
-    const fileList = document.getElementById("fileList");
-    uploadedFiles.forEach(file => {
-      const item = document.createElement("li");
-      item.className = "bg-gray-800 p-4 rounded flex justify-between items-center";
-      item.innerHTML = `
-        <div>
-          <p class="text-teal-300 font-semibold">${file.name}</p>
-          <p class="text-gray-400 text-sm">📁 ${file.url} • ⏱️ ${file.timestamp} week(s)</p>
-        </div>
-        <button onclick="this.closest('li').remove()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white">Delete</button>
-      `;
-      fileList.appendChild(item);
-    });
   </script>
 </body>
 </html>
+
