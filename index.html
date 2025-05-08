@@ -2,73 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Student Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-950 text-white min-h-screen p-6 space-y-10">
+<body class="bg-gray-950 text-white min-h-screen p-6 space-y-8">
+
+  <!-- Shared Google Drive Link -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">
+      <i class="fab fa-google-drive mr-2"></i>Shared Google Drive Folder
+    </h2>
+    <a href="https://drive.google.com/drive/folders/1b1nvtb1UHH_jYu4qZXmcvhm3AHUjqvoM?usp=sharing"
+       target="_blank" class="text-teal-300 hover:underline break-all text-lg">
+      📂 Open Shared Drive
+    </a>
+  </section>
+
+  <!-- Header -->
   <header class="text-center">
     <h1 class="text-4xl font-bold text-teal-400 mb-2">Student Portfolio</h1>
-    <p class="text-gray-400">Track grades, assignments, and uploads</p>
+    <p class="text-gray-400">Manage Assignments and View Grades</p>
   </header>
 
-  <!-- Current Grade -->
-  <section class="bg-gray-900 rounded-lg p-6 shadow">
-    <h2 class="text-2xl font-bold mb-2 text-teal-400">📊 Current Grade</h2>
-    <div id="currentGrade" class="text-green-400 text-3xl">Loading...</div>
+  <!-- Upload Form -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">Upload Assignment</h2>
+    <form id="uploadForm" class="space-y-4">
+      <div>
+        <label for="folderName" class="block mb-1 text-gray-300">Folder Name</label>
+        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Enter folder name" required>
+      </div>
+      <div>
+        <label for="fileUpload" class="block mb-1 text-gray-300">Upload File</label>
+        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white">
+      </div>
+      <div>
+        <label for="fileURL" class="block mb-1 text-gray-300">Or Enter File URL</label>
+        <input type="url" id="fileURL" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="https://example.com/file.pdf">
+      </div>
+      <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded">
+        Upload
+      </button>
+    </form>
   </section>
 
-  <!-- Grade Table -->
-  <section class="bg-gray-900 rounded-lg p-6 shadow">
-    <h2 class="text-2xl font-bold mb-4 text-teal-400">📋 Grade Details</h2>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm text-left text-gray-300">
-        <thead class="text-xs uppercase border-b border-gray-700">
-          <tr>
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">Type</th>
-            <th class="px-4 py-2">Received</th>
-            <th class="px-4 py-2">Max</th>
-            <th class="px-4 py-2">%</th>
-          </tr>
-        </thead>
-        <tbody id="gradesTable" class="text-white"></tbody>
-      </table>
-    </div>
+  <!-- Uploaded Files List -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">Uploaded Files</h2>
+    <ul id="fileList" class="space-y-2"></ul>
   </section>
 
+  <!-- Grade Section -->
+  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
+    <h2 class="text-2xl font-bold mb-3 text-teal-400">Current Grade</h2>
+    <div id="currentGrade" class="text-2xl font-semibold text-green-400">A-</div>
+  </section>
+
+  <!-- JavaScript Logic -->
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwQxPjDzQwJXzy5XjucjwlJhcDEvPI_OyDKITp_VxfMRRK-cX9QcQiyS4KEhSHnD5SvJg/exec";
+    const uploadForm = document.getElementById('uploadForm');
+    const fileList = document.getElementById('fileList');
 
-    // Load current grade percentage
-    fetch(`${API_URL}?action=getTotalGrade`)
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById("currentGrade").textContent = data;
-      })
-      .catch(() => {
-        document.getElementById("currentGrade").textContent = "Error loading grade.";
-      });
+    uploadForm.addEventListener('submit', function (e) {
+      e.preventDefault();
 
-    // Load grade table data
-    fetch(`${API_URL}?action=getGrades`)
-      .then(res => res.json())
-      .then(data => {
-        const table = document.getElementById("gradesTable");
-        data.forEach(row => {
-          const percentage = ((Number(row.grade_received) / Number(row.max_grade)) * 100).toFixed(2);
-          table.innerHTML += `
-            <tr class="border-b border-gray-800 hover:bg-gray-800">
-              <td class="px-4 py-2">${row.grade_name}</td>
-              <td class="px-4 py-2">${row.grade_type}</td>
-              <td class="px-4 py-2">${row.grade_received}</td>
-              <td class="px-4 py-2">${row.max_grade}</td>
-              <td class="px-4 py-2 text-green-400">${percentage}%</td>
-            </tr>
-          `;
-        });
-      });
+      const folderName = document.getElementById('folderName').value.trim();
+      const fileInput = document.getElementById('fileUpload');
+      const fileURL = document.getElementById('fileURL').value.trim();
+
+      if (!folderName) {
+        alert('Please enter a folder name.');
+        return;
+      }
+
+      const li = document.createElement('li');
+      li.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
+
+      const fileName = fileInput.files[0]?.name;
+      if (fileInput.files.length > 0) {
+        li.innerHTML = `
+          <span>${folderName}/${fileName}</span>
+          <button class="text-red-400 hover:text-red-600 delete-btn"><i class="fas fa-trash-alt"></i></button>
+        `;
+      } else if (fileURL) {
+        li.innerHTML = `
+          <a href="${fileURL}" target="_blank" class="text-teal-300 hover:underline">
+            ${folderName}/[Link]
+          </a>
+          <button class="text-red-400 hover:text-red-600 delete-btn"><i class="fas fa-trash-alt"></i></button>
+        `;
+      } else {
+        alert('Please upload a file or provide a URL.');
+        return;
+      }
+
+      fileList.appendChild(li);
+      uploadForm.reset();
+    });
+
+    // Delete file item
+    fileList.addEventListener('click', function (e) {
+      if (e.target.closest('.delete-btn')) {
+        const li = e.target.closest('li');
+        li.remove();
+      }
+    });
+
+    // Dummy grade load simulation (future: fetch from backend)
+    document.getElementById('currentGrade').textContent = "Loading...";
+    setTimeout(() => {
+      document.getElementById('currentGrade').textContent = "A-"; // simulate fetching
+    }, 1000);
   </script>
+
 </body>
 </html>
-
