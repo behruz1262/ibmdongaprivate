@@ -7,26 +7,25 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-950 text-white min-h-screen p-6 space-y-10">
-  <!-- Header -->
   <header class="text-center">
     <h1 class="text-4xl font-bold text-teal-400 mb-2">Student Portfolio</h1>
-    <p class="text-gray-400">Track your assignments and grades</p>
+    <p class="text-gray-400">Track grades, assignments, and uploads</p>
   </header>
 
-  <!-- Total Grade Section -->
+  <!-- Current Grade -->
   <section class="bg-gray-900 rounded-lg p-6 shadow">
     <h2 class="text-2xl font-bold mb-2 text-teal-400">📊 Current Grade</h2>
     <div id="currentGrade" class="text-green-400 text-3xl">Loading...</div>
   </section>
 
-  <!-- Grades Table -->
+  <!-- Grade Table -->
   <section class="bg-gray-900 rounded-lg p-6 shadow">
-    <h2 class="text-2xl font-bold mb-4 text-teal-400">📋 All Grades</h2>
+    <h2 class="text-2xl font-bold mb-4 text-teal-400">📋 Grade Details</h2>
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm text-left text-gray-300">
         <thead class="text-xs uppercase border-b border-gray-700">
           <tr>
-            <th class="px-4 py-2">Grade Name</th>
+            <th class="px-4 py-2">Name</th>
             <th class="px-4 py-2">Type</th>
             <th class="px-4 py-2">Received</th>
             <th class="px-4 py-2">Max</th>
@@ -38,10 +37,16 @@
     </div>
   </section>
 
+  <!-- File Uploads -->
+  <section class="bg-gray-900 rounded-lg p-6 shadow">
+    <h2 class="text-2xl font-bold mb-4 text-teal-400">📂 Uploaded Items</h2>
+    <ul id="fileList" class="space-y-2"></ul>
+  </section>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwQxPjDzQwJXzy5XjucjwlJhcDEvPI_OyDKITp_VxfMRRK-cX9QcQiyS4KEhSHnD5SvJg/exec";
 
-    // Fetch total grade
+    // Load total grade
     fetch(API_URL + "?action=getTotalGrade")
       .then(res => res.text())
       .then(data => {
@@ -51,7 +56,7 @@
         document.getElementById("currentGrade").textContent = "Error loading grade.";
       });
 
-    // Fetch all grade entries
+    // Load grade table
     fetch(API_URL + "?action=getGrades")
       .then(res => res.json())
       .then(data => {
@@ -69,11 +74,33 @@
             </tr>
           `;
         });
-      })
-      .catch(err => {
-        console.error("Error loading grades:", err);
-        document.getElementById("gradesTable").innerHTML = "<tr><td colspan='5' class='px-4 py-2 text-red-400'>Failed to load grades.</td></tr>";
       });
+
+    // Simulated uploaded file list (replace with real API call if needed)
+    const uploadedFiles = [
+      {"id":0,"name":"Current Attendence","url":"Attendence","folder":15,"timestamp":15},
+      {"id":1,"name":"Week 2 - Find Me!","url":"assignment","folder":1.75,"timestamp":3},
+      {"id":2,"name":"Week 3 - CLI","url":"assignment","folder":2.75,"timestamp":3},
+      {"id":3,"name":"Week 4 - Quiz 1","url":"quiz","folder":4,"timestamp":5},
+      {"id":4,"name":"Week 4 - Virtual Library","url":"assignment ","folder":2.5,"timestamp":3},
+      {"id":5,"name":"Week 5 - Idea sourcing","url":"assignment","folder":3,"timestamp":3},
+      {"id":6,"name":"Week 6 - Crypto","url":"project","folder":4,"timestamp":10},
+      {"id":7,"name":"Week 7 - AS","url":"assignment ","folder":2.75,"timestamp":3}
+    ];
+
+    const fileList = document.getElementById("fileList");
+    uploadedFiles.forEach(file => {
+      const item = document.createElement("li");
+      item.className = "bg-gray-800 p-4 rounded flex justify-between items-center";
+      item.innerHTML = `
+        <div>
+          <p class="text-teal-300 font-semibold">${file.name}</p>
+          <p class="text-gray-400 text-sm">📁 ${file.url} • ⏱️ ${file.timestamp} week(s)</p>
+        </div>
+        <button onclick="this.closest('li').remove()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white">Delete</button>
+      `;
+      fileList.appendChild(item);
+    });
   </script>
 </body>
 </html>
