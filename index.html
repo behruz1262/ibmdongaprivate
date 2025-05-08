@@ -2,181 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Student Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-950 text-white min-h-screen p-6 space-y-8">
-
-  <!-- Shared Google Drive Folder -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg mb-6">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400"><i class="fab fa-google-drive mr-2"></i>Shared Google Drive Folder</h2>
-    <a href="https://drive.google.com/drive/folders/1b1nvtb1UHH_jYu4qZXmcvhm3AHUjqvoM?usp=sharing" target="_blank"
-      class="text-teal-300 hover:underline break-all text-lg">
-      📂 Open Shared Drive
-    </a>
-  </section>
-
+<body class="bg-gray-950 text-white min-h-screen p-6 space-y-10">
   <!-- Header -->
   <header class="text-center">
-    <h1 class="text-4xl font-bold mb-2 text-teal-400">Student Portfolio</h1>
-    <p class="text-gray-400">Manage Assignments and View Grades</p>
+    <h1 class="text-4xl font-bold text-teal-400 mb-2">Student Portfolio</h1>
+    <p class="text-gray-400">Track your assignments and grades</p>
   </header>
 
-  <!-- Upload Form -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400">Upload Assignment</h2>
-    <form id="uploadForm" class="space-y-4">
-      <div>
-        <label for="folderName" class="block mb-1 text-gray-300">Folder Name</label>
-        <input type="text" id="folderName" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="Enter folder name" required>
-      </div>
-      <div>
-        <label for="fileUpload" class="block mb-1 text-gray-300">Upload File</label>
-        <input type="file" id="fileUpload" class="w-full p-2 rounded bg-gray-800 text-white">
-      </div>
-      <div>
-        <label for="fileURL" class="block mb-1 text-gray-300">Or Enter File URL</label>
-        <input type="url" id="fileURL" class="w-full p-2 rounded bg-gray-800 text-white" placeholder="https://example.com/file.pdf">
-      </div>
-      <button type="submit" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded">
-        Upload
-      </button>
-    </form>
+  <!-- Total Grade Section -->
+  <section class="bg-gray-900 rounded-lg p-6 shadow">
+    <h2 class="text-2xl font-bold mb-2 text-teal-400">📊 Current Grade</h2>
+    <div id="currentGrade" class="text-green-400 text-3xl">Loading...</div>
   </section>
 
-  <!-- Uploaded Files -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400">Uploaded Files</h2>
-    <ul id="fileList" class="space-y-2"></ul>
+  <!-- Grades Table -->
+  <section class="bg-gray-900 rounded-lg p-6 shadow">
+    <h2 class="text-2xl font-bold mb-4 text-teal-400">📋 All Grades</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-left text-gray-300">
+        <thead class="text-xs uppercase border-b border-gray-700">
+          <tr>
+            <th class="px-4 py-2">Grade Name</th>
+            <th class="px-4 py-2">Type</th>
+            <th class="px-4 py-2">Received</th>
+            <th class="px-4 py-2">Max</th>
+            <th class="px-4 py-2">%</th>
+          </tr>
+        </thead>
+        <tbody id="gradesTable" class="text-white"></tbody>
+      </table>
+    </div>
   </section>
 
-  <!-- Current Grade -->
-  <section class="bg-gray-900 rounded-lg px-6 py-5 shadow-lg">
-    <h2 class="text-2xl font-bold mb-3 text-teal-400">Current Grade</h2>
-    <div id="currentGrade" class="text-2xl font-semibold text-green-400">Loading...</div>
-  </section>
-
-  <!-- Script -->
   <script>
-    // Grade fetching
-    document.addEventListener('DOMContentLoaded', function () {
-      fetch("https://script.google.com/macros/s/AKfycbwQxPjDzQwJXzy5XjucjwlJhcDEvPI_OyDKITp_VxfMRRK-cX9QcQiyS4KEhSHnD5SvJg/exec")
-        .then(res => res.text())
-        .then(data => {
-          document.getElementById('currentGrade').textContent = data;
-        })
-        .catch(err => {
-          document.getElementById('currentGrade').textContent = "Error fetching grade";
-          console.error(err);
-        });
+    const API_URL = "https://script.google.com/macros/s/AKfycbwQxPjDzQwJXzy5XjucjwlJhcDEvPI_OyDKITp_VxfMRRK-cX9QcQiyS4KEhSHnD5SvJg/exec";
 
-      // Load static uploaded file data
-      const fileData = {
-        "files": [
-          {
-            "id": 0,
-            "name": "Current Attendance",
-            "url": "https://example.com/attendance",
-            "folder": "Week 15",
-            "timestamp": "2025-05-08"
-          },
-          {
-            "id": 1,
-            "name": "Week 2 - Find Me!",
-            "url": "https://example.com/week2-assignment",
-            "folder": "Week 2",
-            "timestamp": "2025-03-10"
-          },
-          {
-            "id": 2,
-            "name": "Week 3 - CLI",
-            "url": "https://example.com/week3-cli",
-            "folder": "Week 3",
-            "timestamp": "2025-03-17"
-          },
-          {
-            "id": 3,
-            "name": "Week 4 - Quiz 1",
-            "url": "https://example.com/week4-quiz1",
-            "folder": "Week 4",
-            "timestamp": "2025-03-24"
-          },
-          {
-            "id": 4,
-            "name": "Week 4 - Virtual Library",
-            "url": "https://example.com/week4-virtual-library",
-            "folder": "Week 4",
-            "timestamp": "2025-03-24"
-          },
-          {
-            "id": 5,
-            "name": "Week 5 - Idea Sourcing",
-            "url": "https://example.com/week5-idea-sourcing",
-            "folder": "Week 5",
-            "timestamp": "2025-03-31"
-          },
-          {
-            "id": 6,
-            "name": "Week 6 - Crypto",
-            "url": "https://example.com/week6-crypto",
-            "folder": "Week 6",
-            "timestamp": "2025-04-07"
-          },
-          {
-            "id": 7,
-            "name": "Week 7 - AS",
-            "url": "https://example.com/week7-as",
-            "folder": "Week 7",
-            "timestamp": "2025-04-14"
-          }
-        ]
-      };
-
-      const fileList = document.getElementById('fileList');
-      fileData.files.forEach(file => {
-        const li = document.createElement('li');
-        li.className = "bg-gray-800 p-3 rounded flex justify-between items-center";
-        li.innerHTML = `
-          <div>
-            <strong>${file.folder}</strong>: 
-            <a href="${file.url}" target="_blank" class="text-teal-300 hover:underline ml-1">${file.name}</a>
-          </div>
-          <span class="text-sm text-gray-400">${file.timestamp}</span>
-        `;
-        fileList.appendChild(li);
+    // Fetch total grade
+    fetch(API_URL + "?action=getTotalGrade")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("currentGrade").textContent = data;
+      })
+      .catch(() => {
+        document.getElementById("currentGrade").textContent = "Error loading grade.";
       });
-    });
 
-    // Handle new uploads (local file or URL)
-    document.getElementById('uploadForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      const folderName = document.getElementById('folderName').value.trim();
-      const fileUpload = document.getElementById('fileUpload').files[0];
-      const fileURL = document.getElementById('fileURL').value.trim();
-      const fileList = document.getElementById('fileList');
-
-      if (!folderName) {
-        alert('Please enter a folder name.');
-        return;
-      }
-
-      let listItem = document.createElement('li');
-      listItem.className = 'bg-gray-800 p-3 rounded flex justify-between items-center';
-
-      if (fileUpload) {
-        listItem.innerHTML = `<span>${folderName}/${fileUpload.name}</span><span class="text-green-400">Uploaded</span>`;
-      } else if (fileURL) {
-        listItem.innerHTML = `<a href="${fileURL}" target="_blank" class="text-teal-300 hover:underline">${folderName}/[Link]</a><span class="text-green-400">URL Added</span>`;
-      } else {
-        alert('Please upload a file or enter a file URL.');
-        return;
-      }
-
-      fileList.appendChild(listItem);
-      document.getElementById('uploadForm').reset();
-    });
+    // Fetch all grade entries
+    fetch(API_URL + "?action=getGrades")
+      .then(res => res.json())
+      .then(data => {
+        const table = document.getElementById("gradesTable");
+        table.innerHTML = "";
+        data.forEach(row => {
+          const percentage = ((Number(row.grade_received) / Number(row.max_grade)) * 100).toFixed(2);
+          table.innerHTML += `
+            <tr class="border-b border-gray-800 hover:bg-gray-800">
+              <td class="px-4 py-2">${row.grade_name}</td>
+              <td class="px-4 py-2">${row.grade_type}</td>
+              <td class="px-4 py-2">${row.grade_received}</td>
+              <td class="px-4 py-2">${row.max_grade}</td>
+              <td class="px-4 py-2 text-green-400">${percentage}%</td>
+            </tr>
+          `;
+        });
+      })
+      .catch(err => {
+        console.error("Error loading grades:", err);
+        document.getElementById("gradesTable").innerHTML = "<tr><td colspan='5' class='px-4 py-2 text-red-400'>Failed to load grades.</td></tr>";
+      });
   </script>
 </body>
 </html>
