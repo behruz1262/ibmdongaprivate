@@ -65,15 +65,43 @@
   <!-- your content goes here -->
 </div>
 
+<script>
+// The correct access code
+const CORRECT_ACCESS_CODE = "korea";
 
-  <!-- Access Code Prompt -->
-  <script>
-    const accessCode = prompt("Enter access code:");
-    if (accessCode !== "korea") {
-      document.body.innerHTML = "<div class='text-center mt-20 text-red-500 text-2xl'>Access Denied</div>";
-      throw new Error("Unauthorized");
+// Check if user is already authenticated when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for authentication status
+    const isAuthenticated = sessionStorage.getItem('authenticated');
+    
+    // If not authenticated, show prompt
+    if (isAuthenticated !== 'true') {
+        // Prevent any content from showing by hiding the body
+        document.body.style.display = 'none';
+        
+        // Prompt for the access code
+        const userInput = prompt("Enter access code:");
+        
+        if (userInput === CORRECT_ACCESS_CODE) {
+            // Store authentication in session storage
+            sessionStorage.setItem('authenticated', 'true');
+            // Show the body content
+            document.body.style.display = '';
+        } else {
+            // If wrong code, show access denied and prevent further access
+            document.body.innerHTML = "<div style='text-align:center; margin-top:100px; color:red; font-size:24px;'>Access Denied</div>";
+            document.body.style.display = '';
+        }
     }
-  </script>
+});
+
+// Optional: Add a function to your page to allow logout
+function logoutProtectedSite() {
+    sessionStorage.removeItem('authenticated');
+    location.reload();
+}
+</script>
+  
 
   <!-- Header -->
 <!-- Profile Info -->
