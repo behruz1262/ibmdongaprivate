@@ -66,35 +66,109 @@
 </div>
 
 <script>
-// The correct access code (case-insensitive)
-const CORRECT_ACCESS_CODE = "korea";
+// Configuration
+const ACCESS_CONFIG = {
+  code: "korea",                 // Case-insensitive access code
+  storageKey: "siteAuthToken",   // Storage key name
+  expiryHours: 12,               // How long auth lasts
+  retryLimit: 3                  // Max failed attempts
+};
 
-function checkAuth() {
-    const isAuthenticated = sessionStorage.getItem('authenticated');
+// Main authentication control
+function protectSite() {
+  // Check existing auth first
+  const authData = getAuthData();
+  
+  if (!authData || !isAuthValid(authData)) {
+    // Hide content immediately
+    document.body.style.display = 'none';
     
-    if (isAuthenticated !== 'true') {
-        document.body.style.display = 'none';
-        
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
-            const userInput = prompt("Enter access code:");
-            
-            if (userInput && userInput.toLowerCase() === CORRECT_ACCESS_CODE) {
-                sessionStorage.setItem('authenticated', 'true');
-                document.body.style.display = '';
-            } else {
-                document.body.innerHTML = `
-                    <div style='text-align:center; padding:100px; color:red; font-size:24px;'>
-                        Access Denied. <a href="javascript:location.reload()">Try again</a>
-                    </div>`;
-                document.body.style.display = '';
-            }
-        }, 100);
+    // Track failed attempts
+    let attempts = 0;
+    let grantedAccess = false;
+    
+    while (attempts < ACCESS_CONFIG.retryLimit && !grantedAccess) {
+      const userInput = prompt(`Enter access code (Attempt ${attempts + 1}/${ACCESS_CONFIG.retryLimit}):`);
+      
+      if (!userInput) break; // User cancelled
+      
+      if (userInput.toLowerCase() === ACCESS_CONFIG.code) {
+        grantAccess();
+        grantedAccess = true;
+      } else {
+        attempts++;
+      }
     }
+    
+    if (!grantedAccess) {
+      showAccessDenied();
+      return;
+    }
+  }
+  
+  // Show protected content
+  document.body.style.display = '';
 }
 
-// Run after DOM loads
-document.addEventListener('DOMContentLoaded', checkAuth);
+// Helper functions
+function getAuthData() {
+  const data = localStorage.getItem(ACCESS_CONFIG.storageKey);
+  return data ? JSON.parse(data) : null;
+}
+
+function isAuthValid(authData) {
+  return authData.timestamp > Date.now() - (ACCESS_CONFIG.expiryHours * 60 * 60 * 1000);
+}
+
+function grantAccess() {
+  const authData = {
+    timestamp: Date.now(),
+    expires: Date.now() + (ACCESS_CONFIG.expiryHours * 60 * 60 * 1000)
+  };
+  localStorage.setItem(ACCESS_CONFIG.storageKey, JSON.stringify(authData));
+}
+
+function showAccessDenied() {
+  document.body.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #111;
+      color: red;
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    ">
+      <h1 style="font-size: 2.5rem">ACCESS DENIED</h1>
+      <p style="font-size: 1.2rem">Invalid access code</p>
+      <button onclick="location.reload()" style="
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+      ">
+        Try Again
+      </button>
+    </div>`;
+}
+
+// Initialize protection when DOM loads
+document.addEventListener('DOMContentLoaded', protectSite);
+
+// Optional: Add logout function
+function logout() {
+  localStorage.removeItem(ACCESS_CONFIG.storageKey);
+  location.reload();
+}
 </script>
   
 
