@@ -374,6 +374,7 @@ function logout() {
     }
 
     function getLetterGrade(percent) {
+      if (percent >= 95) return "A";
       if (percent >= 90) return "A";
       if (percent >= 85) return "A-";
       if (percent >= 80) return "B+";
