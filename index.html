@@ -317,7 +317,7 @@
 </div>
 
 <script>
-const gradeUrl = "https://script.google.com/macros/s/AKfycbxThQ4u6v-itN6EPP-H0NQVPQac0rsIR7ynBCYpzyXzlb2nzmO76Va5w9K6iQZjH4ub/exec";
+const gradeUrl = "https://script.google.com/macros/s/AKfycbzGJgzkcthm_VzE_PwGpPCb6d83WK_uNec4CsjI1H_X2lcAezAPsedrlmoxaXp4ifWV/exec";
 
 async function fetchGrades() {
   try {
@@ -431,5 +431,33 @@ fetchGrades();
     }
   });
 </script>
+<script>
+async function fetchCWG() {
+  try {
+    const res = await fetch(gradeUrl);
+    const data = await res.json();
+    if (data.error) {
+      document.getElementById("cwg-display").innerText = "CWG: Error in data.";
+      return;
+    }
+
+    document.getElementById("cwg-display").innerHTML = `
+      Current Working Grade (CWG): 
+      <span class="font-bold text-green-400">${data.earned}/${data.max}</span> = 
+      <span class="font-bold text-green-400">${data.percent}%</span> 
+      <span class="text-sm">(${data.letter})</span>
+    `;
+
+    document.getElementById("cwg-progress").style.width = `${data.percent}%`;
+  } catch (e) {
+    console.error("CWG Fetch Error:", e);
+    document.getElementById("cwg-display").innerText = "CWG not available.";
+  }
+}
+
+fetchCWG();
+</script>
+
+
 </body>
 </html>
