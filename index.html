@@ -155,6 +155,12 @@
     <div>
       <div id="overall-grade" class="text-xl font-bold text-green-400">Loading...</div>
       <div class="text-md text-white mt-1" id="cwg-display"></div>
+<!-- Progress bar for CWG -->
+<div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+  <div id="cwg-progress" class="bg-green-400 h-2 rounded-full" style="width: 0%"></div>
+</div>
+
+
     </div>
   </div>
 
@@ -343,7 +349,14 @@ async function fetchGrades() {
     const overall = (received / total) * 100;
     const letter = getLetterGrade(overall);
     document.getElementById("overall-grade").innerText = `${overall.toFixed(1)}% (${letter})`;
-    document.getElementById("cwg-display").innerText = `Current Working Grade (CWG): ${received} / ${total} (${overall.toFixed(1)}%)`;
+    document.getElementById("cwg-display").innerHTML = `
+  Current Working Grade (CWG): 
+  <span class="font-bold text-green-400">${overall.toFixed(1)}%</span> 
+  <span class="text-sm">(${letter})</span>
+`;
+
+document.getElementById("cwg-progress").style.width = `${overall.toFixed(1)}%`;
+
 
     renderChart(labels, scores);
   } catch (err) {
