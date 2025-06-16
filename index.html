@@ -130,11 +130,6 @@
     location.reload();
   }
 </script>
-
-  <div class="text-right mb-4">
-    <button onclick="logout()" class="text-sm text-red-400 underline hover:text-red-500">Logout</button>
-  </div>
-
   
 
   <!-- Header -->
@@ -155,12 +150,6 @@
     <div>
       <div id="overall-grade" class="text-xl font-bold text-green-400">Loading...</div>
       <div class="text-md text-white mt-1" id="cwg-display"></div>
-<!-- Progress bar for CWG -->
-<div class="w-full bg-gray-700 rounded-full h-2 mt-2">
-  <div id="cwg-progress" class="bg-green-400 h-2 rounded-full" style="width: 0%"></div>
-</div>
-
-
     </div>
   </div>
 
@@ -272,26 +261,44 @@
   </a>
 </div>
 
-</div>
-<!-- WEEK 13 Folder -->
+
+<!-- Week 13 Folder -->
 <div class="bg-gray-900 p-4 rounded-xl mb-6">
   <h2 class="text-2xl font-bold text-teal-400 mb-4">WEEK 13 Folder</h2>
-  
-  <a href="https://chatgpt.com/share/683d35fb-a21c-8011-b28c-5ada102baced" 
-     target="_blank"
+  <a href="https://chatgpt.com/share/683d35fb-a21c-8011-b28c-5ada102baced" target="_blank"
      class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg mb-2">
     📄 WEEK 13 - AI Tutor
   </a>
-  
-  <a href="https://docs.google.com/document/d/1gmo7wk2ksMkx_U_QePU1oOy_ztC5-Pxv4hcpt1MTPBg/edit?usp=sharing" 
-     target="_blank"
+  <a href="https://docs.google.com/document/d/1gmo7wk2ksMkx_U_QePU1oOy_ztC5-Pxv4hcpt1MTPBg/edit?usp=sharing" target="_blank"
      class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg">
     🌐 WEEK 13 - Reflection on the learning process
   </a>
 </div>
 
+<!-- Week 17 Folder -->
+<div class="bg-gray-900 p-4 rounded-xl mb-6">
+  <h2 class="text-2xl font-bold text-teal-400 mb-4">WEEK 17 Folder</h2>
+  <a href="https://docs.google.com/document/d/1I1I_Vd8S67QHcsHUg1aCWzQYJOk3knzq3yTd3nvmrfg/edit?usp=sharing" target="_blank"
+     class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg mb-2">
+    📄 WEEK 17 - PROJECT
+  </a>
+  <a href="https://docs.google.com/document/d/1MpqIQqnW2dauHo7X2ZbkcVBecOf2YPO6-S_s7V7ULBM/edit?usp=sharing" target="_blank"
+     class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg mb-2">
+    🌐 WEEK 17 - READ.ME
+  </a>
+  <a href="https://docs.google.com/document/d/YOUR_ACTUAL_CODE_DOC_ID/edit?usp=sharing" target="_blank"
+     class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg mb-2">
+    💻 WEEK 17 - What I Used (Codes)
+  </a>
+  <a href="https://docs.google.com/document/d/YOUR_ACTUAL_VIDEO_DOC_ID/edit?usp=sharing" target="_blank"
+     class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg mb-2">
+    🎥 WEEK 17 - VIDEOS
+  </a>
+  <a href="https://drive.google.com/drive/folders/1lCc9XDpz69rXjGWg8lC46EJSf6IOY50F?usp=sharing" target="_blank"
+     class="block max-w-full break-words bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition hover:scale-105 hover:shadow-lg">
+    📸 WEEK 17 - SCREENSHOTS
+  </a>
 </div>
-
 
  
 
@@ -317,7 +324,7 @@
 </div>
 
 <script>
-const gradeUrl = "https://script.google.com/macros/s/AKfycbzGJgzkcthm_VzE_PwGpPCb6d83WK_uNec4CsjI1H_X2lcAezAPsedrlmoxaXp4ifWV/exec";
+const gradeUrl = "https://script.google.com/macros/s/AKfycbwQxPjDzQwJXzy5XjucjwlJhcDEvPI_OyDKITp_VxfMRRK-cX9QcQiyS4KEhSHnD5SvJg/exec";
 
 async function fetchGrades() {
   try {
@@ -349,14 +356,7 @@ async function fetchGrades() {
     const overall = (received / total) * 100;
     const letter = getLetterGrade(overall);
     document.getElementById("overall-grade").innerText = `${overall.toFixed(1)}% (${letter})`;
-    document.getElementById("cwg-display").innerHTML = `
-  Current Working Grade (CWG): 
-  <span class="font-bold text-green-400">${overall.toFixed(1)}%</span> 
-  <span class="text-sm">(${letter})</span>
-`;
-
-document.getElementById("cwg-progress").style.width = `${overall.toFixed(1)}%`;
-
+    document.getElementById("cwg-display").innerText = `Current Working Grade (CWG): ${received} / ${total} (${overall.toFixed(1)}%)`;
 
     renderChart(labels, scores);
   } catch (err) {
@@ -431,33 +431,5 @@ fetchGrades();
     }
   });
 </script>
-<script>
-async function fetchCWG() {
-  try {
-    const res = await fetch(gradeUrl);
-    const data = await res.json();
-    if (data.error) {
-      document.getElementById("cwg-display").innerText = "CWG: Error in data.";
-      return;
-    }
-
-    document.getElementById("cwg-display").innerHTML = `
-      Current Working Grade (CWG): 
-      <span class="font-bold text-green-400">${data.earned}/${data.max}</span> = 
-      <span class="font-bold text-green-400">${data.percent}%</span> 
-      <span class="text-sm">(${data.letter})</span>
-    `;
-
-    document.getElementById("cwg-progress").style.width = `${data.percent}%`;
-  } catch (e) {
-    console.error("CWG Fetch Error:", e);
-    document.getElementById("cwg-display").innerText = "CWG not available.";
-  }
-}
-
-fetchCWG();
-</script>
-
-
 </body>
 </html>
